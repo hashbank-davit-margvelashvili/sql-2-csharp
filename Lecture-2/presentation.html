@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Session 2: Types, Variables, and Expressions</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface2: #334155;
+    --accent: #3b82f6;
+    --accent2: #8b5cf6;
+    --text: #e2e8f0;
+    --text-dim: #94a3b8;
+    --green: #22c55e;
+    --orange: #f59e0b;
+    --red: #ef4444;
+    --cyan: #06b6d4;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg); color: var(--text); overflow: hidden; height: 100vh;
+  }
+  .progress-bar {
+    position: fixed; top: 0; left: 0; height: 4px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.4s ease; z-index: 100;
+  }
+  .slide-container {
+    width: 100vw; height: 100vh; display: flex;
+    align-items: center; justify-content: center; padding: 40px 80px;
+  }
+  .slide { display: none; width: 100%; max-width: 1100px; animation: fadeIn 0.4s ease; }
+  .slide.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+  h1 {
+    font-size: 2.8em; font-weight: 700; margin-bottom: 12px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  h2 { font-size: 2.2em; font-weight: 600; margin-bottom: 30px; }
+  h3 { font-size: 1.3em; font-weight: 600; margin-bottom: 16px; color: var(--accent); }
+  .subtitle { font-size: 1.3em; color: var(--text-dim); margin-bottom: 40px; }
+  p, li { font-size: 1.15em; line-height: 1.7; }
+  ul { list-style: none; padding: 0; }
+  ul li { padding: 8px 0 8px 28px; position: relative; }
+  ul li::before { content:'▸'; position:absolute; left:0; color:var(--accent); font-weight:bold; }
+  pre {
+    background: var(--surface); border: 1px solid var(--surface2); border-radius: 12px;
+    padding: 20px 24px; overflow-x: auto; margin: 16px 0; font-size: 0.95em;
+  }
+  code { font-family: 'Cascadia Code','Fira Code','Consolas', monospace; font-size: 0.95em; }
+  pre code { color: var(--text); }
+  .kw { color: var(--accent); } .str { color: var(--green); } .cm { color: var(--text-dim); font-style: italic; }
+  .tp { color: var(--cyan); } .nm { color: var(--orange); }
+  :not(pre) > code { background: var(--surface); padding: 3px 8px; border-radius: 6px; color: var(--cyan); }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 1.05em; }
+  th { background: var(--surface2); padding: 12px 16px; text-align: left; font-weight: 600; color: var(--accent); border-bottom: 2px solid var(--accent); }
+  td { padding: 10px 16px; border-bottom: 1px solid var(--surface2); }
+  tr:hover td { background: var(--surface); }
+  .columns { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
+  .highlight-box {
+    background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(139,92,246,0.1));
+    border: 1px solid rgba(59,130,246,0.3); border-radius: 12px; padding: 20px 24px; margin: 16px 0;
+  }
+  .highlight-box.green { background: linear-gradient(135deg, rgba(34,197,94,0.1), rgba(6,182,212,0.1)); border-color: rgba(34,197,94,0.3); }
+  .highlight-box.orange { background: linear-gradient(135deg, rgba(245,158,11,0.1), rgba(239,68,68,0.1)); border-color: rgba(245,158,11,0.3); }
+  .highlight-box.red { background: linear-gradient(135deg, rgba(239,68,68,0.1), rgba(245,158,11,0.1)); border-color: rgba(239,68,68,0.3); }
+  .analogy {
+    background: var(--surface); border-left: 4px solid var(--orange);
+    border-radius: 0 12px 12px 0; padding: 16px 20px; margin: 16px 0; font-size: 1.1em;
+  }
+  .analogy::before { content: '🔗 SQL Analogy: '; color: var(--orange); font-weight: 600; }
+  .step { display: flex; align-items: flex-start; gap: 16px; margin: 12px 0; }
+  .step-num {
+    flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%; background: var(--accent);
+    color: white; display: flex; align-items: center; justify-content: center; font-weight: 700;
+  }
+  .step-content { padding-top: 5px; }
+  .quiz-option {
+    background: var(--surface); border: 2px solid var(--surface2); border-radius: 10px;
+    padding: 14px 20px; margin: 8px 0; cursor: pointer; transition: all 0.2s; font-size: 1.05em;
+  }
+  .quiz-option:hover { border-color: var(--accent); background: var(--surface2); }
+  .quiz-option.correct { border-color: var(--green); background: rgba(34,197,94,0.15); }
+  .quiz-option.wrong { border-color: var(--red); background: rgba(239,68,68,0.1); }
+  .quiz-feedback { margin-top: 12px; padding: 12px 16px; border-radius: 8px; display: none; font-size: 1.05em; }
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.correct { background: rgba(34,197,94,0.15); color: var(--green); }
+  .quiz-feedback.wrong { background: rgba(239,68,68,0.1); color: var(--red); }
+  .code-runner { background: var(--surface); border: 1px solid var(--surface2); border-radius: 12px; overflow: hidden; margin: 16px 0; }
+  .code-runner-header { background: var(--surface2); padding: 8px 16px; display: flex; justify-content: space-between; align-items: center; font-size: 0.9em; color: var(--text-dim); }
+  .run-btn { background: var(--green); color: white; border: none; padding: 6px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: all 0.2s; }
+  .run-btn:hover { opacity: 0.85; transform: scale(1.02); }
+  .code-output { border-top: 1px solid var(--surface2); padding: 12px 16px; font-family: 'Cascadia Code', monospace; font-size: 0.9em; color: var(--green); display: none; white-space: pre-wrap; }
+  .code-output.show { display: block; }
+  .flow { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; margin: 20px 0; }
+  .flow-box { background: var(--surface); border: 2px solid var(--accent); border-radius: 10px; padding: 12px 20px; font-weight: 600; text-align: center; min-width: 120px; }
+  .flow-box.sql { border-color: var(--orange); }
+  .flow-arrow { color: var(--text-dim); font-size: 1.5em; font-weight: bold; }
+  .nav { position: fixed; bottom: 30px; right: 40px; display: flex; gap: 12px; align-items: center; z-index: 50; }
+  .nav button { background: var(--surface); border: 1px solid var(--surface2); color: var(--text); width: 48px; height: 48px; border-radius: 50%; cursor: pointer; font-size: 1.2em; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+  .nav button:hover { background: var(--accent); border-color: var(--accent); }
+  .nav button:disabled { opacity: 0.3; cursor: not-allowed; }
+  .slide-counter { color: var(--text-dim); font-size: 0.95em; min-width: 60px; text-align: center; }
+  .title-slide { text-align: center; }
+  .title-slide h1 { font-size: 3.2em; margin-bottom: 8px; }
+  .session-info { display: inline-flex; gap: 24px; margin-top: 40px; color: var(--text-dim); font-size: 1em; }
+  .session-info span { background: var(--surface); padding: 8px 20px; border-radius: 20px; border: 1px solid var(--surface2); }
+  .reveal-item { opacity: 0; transform: translateY(10px); transition: all 0.3s ease; }
+  .reveal-item.visible { opacity: 1; transform: translateY(0); }
+  .keyboard-hints { position: fixed; bottom: 30px; left: 40px; color: var(--text-dim); font-size: 0.85em; z-index: 50; }
+  kbd { background: var(--surface); border: 1px solid var(--surface2); padding: 2px 8px; border-radius: 4px; font-family: monospace; font-size: 0.9em; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 0.85em; font-weight: 600; }
+  .badge.value { background: rgba(6,182,212,0.2); color: var(--cyan); }
+  .badge.ref { background: rgba(139,92,246,0.2); color: var(--accent2); }
+  .memory-diagram { display: flex; gap: 40px; justify-content: center; margin: 20px 0; }
+  .mem-box { background: var(--surface); border: 2px solid var(--surface2); border-radius: 10px; padding: 16px 24px; text-align: center; min-width: 140px; }
+  .mem-box .label { color: var(--text-dim); font-size: 0.85em; margin-bottom: 8px; }
+  .mem-box .value { font-size: 1.4em; font-weight: 700; font-family: 'Cascadia Code', monospace; }
+  .mem-box.highlight { border-color: var(--accent); }
+  .mem-arrow { display: flex; align-items: center; color: var(--accent); font-size: 1.5em; }
+  @media (max-width: 900px) { .slide-container { padding: 20px 30px; } .columns { grid-template-columns: 1fr; gap: 20px; } h1 { font-size: 2em; } h2 { font-size: 1.6em; } }
+</style>
+</head>
+<body>
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- ===== SLIDE 1: Title ===== -->
+<div class="slide-container">
+<div class="slide active title-slide" data-slide="1">
+  <p style="font-size:1em; color:var(--accent); letter-spacing:3px; margin-bottom:16px;">SESSION 2</p>
+  <h1>Types, Variables, and Expressions</h1>
+  <p class="subtitle">Thinking Beyond SQL Data Types</p>
+  <p style="color:var(--text-dim); font-size:1.1em; margin-top:20px;">SQL-to-.NET Developer Transition Program</p>
+  <div class="session-info">
+    <span>Phase 1 / Block A</span>
+    <span>2 hours</span>
+    <span>.NET 10 &bull; C# 14</span>
+  </div>
+</div>
+
+<!-- ===== SLIDE 2: Objectives ===== -->
+<div class="slide" data-slide="2">
+  <h2>Learning Objectives</h2>
+  <p style="color:var(--text-dim); margin-bottom:24px;">By the end of this session, you will be able to:</p>
+  <div class="step reveal-item">
+    <div class="step-num">1</div>
+    <div class="step-content"><p><strong>Map SQL Server data types to C# types</strong> confidently &mdash; INT, DECIMAL, NVARCHAR, BIT, DATETIME and more</p></div>
+  </div>
+  <div class="step reveal-item">
+    <div class="step-num">2</div>
+    <div class="step-content"><p><strong>Understand value types vs reference types</strong> &mdash; a concept that doesn't exist in SQL</p></div>
+  </div>
+  <div class="step reveal-item">
+    <div class="step-num">3</div>
+    <div class="step-content"><p><strong>Use operators, expressions, and type conversions</strong> &mdash; including null operators that replace ISNULL/COALESCE</p></div>
+  </div>
+  <div class="step reveal-item">
+    <div class="step-num">4</div>
+    <div class="step-content"><p><strong>Work with strings</strong> &mdash; manipulation, formatting, and interpolation</p></div>
+  </div>
+</div>
+
+<!-- ===== SLIDE 3: The Complete Type Map ===== -->
+<div class="slide" data-slide="3">
+  <h2>The Complete Type Map</h2>
+  <p style="margin-bottom:16px;">Every SQL type has a C# equivalent. You already know the concepts &mdash; only names change.</p>
+  <table style="font-size:1em;">
+    <tr><th>SQL Server</th><th>C#</th><th>Example</th></tr>
+    <tr><td>INT</td><td><code class="tp">int</code></td><td><code><span class="tp">int</span> id = <span class="nm">42</span>;</code></td></tr>
+    <tr><td>BIGINT</td><td><code class="tp">long</code></td><td><code><span class="tp">long</span> bigId = <span class="nm">9_000_000_000L</span>;</code></td></tr>
+    <tr><td>DECIMAL(18,2)</td><td><code class="tp">decimal</code></td><td><code><span class="tp">decimal</span> amount = <span class="nm">100.50m</span>;</code></td></tr>
+    <tr><td>BIT</td><td><code class="tp">bool</code></td><td><code><span class="tp">bool</span> active = <span class="kw">true</span>;</code></td></tr>
+    <tr><td>NVARCHAR</td><td><code class="tp">string</code></td><td><code><span class="tp">string</span> name = <span class="str">"Davit"</span>;</code></td></tr>
+    <tr><td>DATETIME</td><td><code class="tp">DateTime</code></td><td><code><span class="tp">DateTime</span> now = DateTime.Now;</code></td></tr>
+    <tr><td>DATE</td><td><code class="tp">DateOnly</code></td><td><code><span class="tp">DateOnly</span> today = DateOnly.FromDateTime(DateTime.Now);</code></td></tr>
+    <tr><td>UNIQUEIDENTIFIER</td><td><code class="tp">Guid</code></td><td><code><span class="tp">Guid</span> id = Guid.NewGuid();</code></td></tr>
+  </table>
+</div>
+
+<!-- ===== SLIDE 4: Decimal Warning ===== -->
+<div class="slide" data-slide="4">
+  <h2>Decimal vs Double &mdash; Critical for Banking</h2>
+  <div class="highlight-box red">
+    <p><strong>Never use <code>float</code> or <code>double</code> for money.</strong> They have floating-point precision errors.</p>
+  </div>
+  <div class="code-runner">
+    <div class="code-runner-header"><span>Precision comparison</span><button class="run-btn" onclick="simulateRun(this,'precision')">&#9654; Run</button></div>
+    <pre><code><span class="cm">// WRONG -- floating point error</span>
+<span class="tp">double</span> wrong = <span class="nm">0.1</span> + <span class="nm">0.2</span>;
+Console.WriteLine(<span class="str">$"double: {wrong}"</span>);
+
+<span class="cm">// CORRECT -- exact decimal arithmetic</span>
+<span class="tp">decimal</span> correct = <span class="nm">0.1m</span> + <span class="nm">0.2m</span>;
+Console.WriteLine(<span class="str">$"decimal: {correct}"</span>);</code></pre>
+    <div class="code-output" id="precision">double: 0.30000000000000004
+decimal: 0.3</div>
+  </div>
+  <div class="analogy" style="margin-top:20px;">In SQL Server, you use DECIMAL for money, not FLOAT. Same rule in C# &mdash; always use <code>decimal</code> with the <code>m</code> suffix.</div>
+  <pre style="margin-top:12px;"><code><span class="tp">decimal</span> balance = <span class="nm">45_000.50m</span>;   <span class="cm">// The 'm' means "decimal literal"</span>
+<span class="tp">decimal</span> fee = <span class="nm">2.5m</span>;             <span class="cm">// Underscores for readability</span></code></pre>
+</div>
+
+<!-- ===== SLIDE 5: Strings ===== -->
+<div class="slide" data-slide="5">
+  <h2>Strings &mdash; Simpler Than SQL</h2>
+  <div class="columns">
+    <div class="column">
+      <h3>SQL Server</h3>
+      <ul>
+        <li><code>CHAR(n)</code> / <code>VARCHAR(n)</code></li>
+        <li><code>NCHAR(n)</code> / <code>NVARCHAR(n)</code></li>
+        <li>Fixed vs variable length</li>
+        <li>ASCII vs Unicode</li>
+        <li>Must declare size: <code>(50)</code>, <code>(MAX)</code></li>
+      </ul>
+    </div>
+    <div class="column">
+      <h3>C#</h3>
+      <ul>
+        <li>Just <code>string</code></li>
+        <li>Always Unicode</li>
+        <li>Always variable length</li>
+        <li>No size limit declaration</li>
+        <li>Immutable (modifications create new strings)</li>
+      </ul>
+    </div>
+  </div>
+  <pre style="margin-top:16px;"><code><span class="tp">string</span> name = <span class="str">"Davit"</span>;              <span class="cm">// Like NVARCHAR -- always Unicode</span>
+<span class="tp">string</span> empty = <span class="str">""</span>;                    <span class="cm">// Empty string (not NULL)</span>
+<span class="tp">string</span>? nullable = <span class="kw">null</span>;             <span class="cm">// Nullable string (? = can be NULL)</span>
+<span class="tp">string</span> long = <span class="str">"Any length, no MAX needed"</span>;</code></pre>
+</div>
+
+<!-- ===== SLIDE 6: Bool and DateTime ===== -->
+<div class="slide" data-slide="6">
+  <h2>Boolean and Date/Time Types</h2>
+  <div class="columns">
+    <div class="column">
+      <h3>Boolean: <code>bool</code> vs <code>BIT</code></h3>
+      <pre><code><span class="cm">// SQL: DECLARE @active BIT = 1</span>
+<span class="tp">bool</span> isActive = <span class="kw">true</span>;
+
+<span class="cm">// SQL: IF @active = 1</span>
+<span class="kw">if</span> (isActive)  <span class="cm">// No == true needed!</span>
+{
+    Console.WriteLine(<span class="str">"Active"</span>);
+}
+
+<span class="cm">// Negation</span>
+<span class="kw">if</span> (!isActive) <span class="cm">// SQL: IF @active = 0</span>
+{
+    Console.WriteLine(<span class="str">"Inactive"</span>);
+}</code></pre>
+    </div>
+    <div class="column">
+      <h3>Date/Time Types</h3>
+      <pre><code><span class="cm">// Current date and time</span>
+<span class="tp">DateTime</span> now = DateTime.Now;
+
+<span class="cm">// Just the date (like DATE)</span>
+<span class="tp">DateOnly</span> today =
+  DateOnly.FromDateTime(DateTime.Now);
+
+<span class="cm">// Just the time (like TIME)</span>
+<span class="tp">TimeOnly</span> time =
+  TimeOnly.FromDateTime(DateTime.Now);
+
+<span class="cm">// Duration (like DATEDIFF result)</span>
+<span class="tp">TimeSpan</span> duration =
+  TimeSpan.FromHours(<span class="nm">2.5</span>);
+
+<span class="cm">// Add duration to a date</span>
+<span class="tp">DateTime</span> future = now + duration;</code></pre>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SLIDE 7: Value vs Reference ===== -->
+<div class="slide" data-slide="7">
+  <h2>Value Types vs Reference Types</h2>
+  <p style="margin-bottom:16px;">A concept SQL doesn't have. This is fundamental to understanding C#.</p>
+  <div class="columns">
+    <div class="column">
+      <h3><span class="badge value">Value Type</span> &mdash; IS the data</h3>
+      <p>Variable contains the actual value. Copy = independent clone.</p>
+      <pre><code><span class="tp">int</span> a = <span class="nm">42</span>;
+<span class="tp">int</span> b = a;     <span class="cm">// Copy the value</span>
+b = <span class="nm">100</span>;       <span class="cm">// Only b changes</span>
+
+Console.WriteLine(a); <span class="cm">// 42</span>
+Console.WriteLine(b); <span class="cm">// 100</span></code></pre>
+      <div class="memory-diagram" style="gap:20px; justify-content:flex-start;">
+        <div class="mem-box"><div class="label">a</div><div class="value" style="color:var(--cyan)">42</div></div>
+        <div class="mem-box"><div class="label">b</div><div class="value" style="color:var(--cyan)">100</div></div>
+      </div>
+    </div>
+    <div class="column">
+      <h3><span class="badge ref">Reference Type</span> &mdash; Points to data</h3>
+      <p>Variable holds a reference. Copy = both point to same data.</p>
+      <pre><code><span class="tp">int</span>[] a = { <span class="nm">1</span>, <span class="nm">2</span>, <span class="nm">3</span> };
+<span class="tp">int</span>[] b = a;   <span class="cm">// Copy the reference</span>
+b[<span class="nm">0</span>] = <span class="nm">999</span>;   <span class="cm">// Both are affected!</span>
+
+Console.WriteLine(a[<span class="nm">0</span>]); <span class="cm">// 999!</span>
+Console.WriteLine(b[<span class="nm">0</span>]); <span class="cm">// 999</span></code></pre>
+      <div class="memory-diagram" style="gap:10px; justify-content:flex-start;">
+        <div class="mem-box"><div class="label">a</div><div class="value" style="color:var(--accent2)">ref</div></div>
+        <div class="mem-arrow">&#8594;</div>
+        <div class="mem-box highlight"><div class="label">shared data</div><div class="value" style="color:var(--orange)">[999, 2, 3]</div></div>
+        <div class="mem-arrow">&#8592;</div>
+        <div class="mem-box"><div class="label">b</div><div class="value" style="color:var(--accent2)">ref</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SLIDE 8: Which is which? ===== -->
+<div class="slide" data-slide="8">
+  <h2>Which Types Are Which?</h2>
+  <div class="columns">
+    <div class="column">
+      <h3><span class="badge value">Value Types</span></h3>
+      <table style="font-size:1em;">
+        <tr><td><code>int</code>, <code>long</code>, <code>short</code>, <code>byte</code></td></tr>
+        <tr><td><code>decimal</code>, <code>float</code>, <code>double</code></td></tr>
+        <tr><td><code>bool</code></td></tr>
+        <tr><td><code>char</code></td></tr>
+        <tr><td><code>DateTime</code>, <code>DateOnly</code>, <code>TimeOnly</code></td></tr>
+        <tr><td><code>Guid</code></td></tr>
+        <tr><td><code>struct</code> (Session 6)</td></tr>
+        <tr><td><code>enum</code> (Session 6)</td></tr>
+      </table>
+    </div>
+    <div class="column">
+      <h3><span class="badge ref">Reference Types</span></h3>
+      <table style="font-size:1em;">
+        <tr><td><code>string</code> (immutable &mdash; acts like value)</td></tr>
+        <tr><td><code>object</code></td></tr>
+        <tr><td>Arrays: <code>int[]</code>, <code>string[]</code></td></tr>
+        <tr><td><code>List&lt;T&gt;</code>, <code>Dictionary</code> (Session 7)</td></tr>
+        <tr><td>Any <code>class</code> (Session 4)</td></tr>
+      </table>
+      <div class="highlight-box green" style="margin-top:16px;">
+        <p><code>string</code> is technically a reference type, but it's <strong>immutable</strong> &mdash; every "modification" creates a new string. So it <em>behaves</em> like a value type.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SLIDE 9: var keyword ===== -->
+<div class="slide" data-slide="9">
+  <h2>The <code>var</code> Keyword</h2>
+  <p style="margin-bottom:16px;">Let the compiler figure out the type. Still strictly typed &mdash; just shorthand.</p>
+  <div class="code-runner">
+    <div class="code-runner-header"><span>Type inference</span><button class="run-btn" onclick="simulateRun(this,'var-demo')">&#9654; Run</button></div>
+    <pre><code><span class="kw">var</span> count = <span class="nm">42</span>;                <span class="cm">// Compiler: this is int</span>
+<span class="kw">var</span> name = <span class="str">"Davit"</span>;             <span class="cm">// Compiler: this is string</span>
+<span class="kw">var</span> balance = <span class="nm">15000.50m</span>;        <span class="cm">// Compiler: this is decimal</span>
+<span class="kw">var</span> today = DateTime.Now;        <span class="cm">// Compiler: this is DateTime</span>
+
+Console.WriteLine(count.GetType());
+Console.WriteLine(name.GetType());
+Console.WriteLine(balance.GetType());
+Console.WriteLine(today.GetType());</code></pre>
+    <div class="code-output" id="var-demo">System.Int32
+System.String
+System.Decimal
+System.DateTime</div>
+  </div>
+  <div class="highlight-box orange" style="margin-top:12px;">
+    <p><strong><code>var</code> is NOT dynamic typing.</strong> The type is locked at compile time. <code>var x = 42; x = "hello";</code> is a <span style="color:var(--red)">compile error</span>.</p>
+  </div>
+</div>
+
+<!-- ===== SLIDE 10: Comparison Operators ===== -->
+<div class="slide" data-slide="10">
+  <h2>Comparison Operators</h2>
+  <table>
+    <tr><th>Operation</th><th>C#</th><th>T-SQL</th><th>Watch out</th></tr>
+    <tr><td>Equal</td><td><code>a == b</code></td><td><code>@a = @b</code></td><td style="color:var(--red)"><strong>Two</strong> equal signs in C#!</td></tr>
+    <tr><td>Not equal</td><td><code>a != b</code></td><td><code>@a &lt;&gt; @b</code></td><td></td></tr>
+    <tr><td>Greater than</td><td><code>a &gt; b</code></td><td><code>@a &gt; @b</code></td><td>Identical</td></tr>
+    <tr><td>Less than</td><td><code>a &lt; b</code></td><td><code>@a &lt; @b</code></td><td>Identical</td></tr>
+    <tr><td>Greater or equal</td><td><code>a &gt;= b</code></td><td><code>@a &gt;= @b</code></td><td>Identical</td></tr>
+    <tr><td>Less or equal</td><td><code>a &lt;= b</code></td><td><code>@a &lt;= @b</code></td><td>Identical</td></tr>
+    <tr><td>AND</td><td><code>&&</code></td><td><code>AND</code></td><td>Short-circuits</td></tr>
+    <tr><td>OR</td><td><code>||</code></td><td><code>OR</code></td><td>Short-circuits</td></tr>
+    <tr><td>NOT</td><td><code>!</code></td><td><code>NOT</code></td><td>Prefix: <code>!isActive</code></td></tr>
+  </table>
+  <div class="highlight-box red" style="margin-top:16px;">
+    <p><strong>Most common mistake:</strong> In C#, <code>=</code> is assignment, <code>==</code> is comparison. Writing <code>if (x = 5)</code> is a compile error, not a silent bug.</p>
+  </div>
+</div>
+
+<!-- ===== SLIDE 11: Null operators ===== -->
+<div class="slide" data-slide="11">
+  <h2>Null Operators &mdash; Your New Superpowers</h2>
+  <div class="columns">
+    <div class="column">
+      <h3><code>??</code> Null-Coalescing</h3>
+      <pre><code><span class="cm">// C#</span>
+<span class="tp">string</span>? name = <span class="kw">null</span>;
+<span class="tp">string</span> display = name ?? <span class="str">"Unknown"</span>;
+<span class="cm">// display = "Unknown"</span></code></pre>
+      <pre><code><span class="cm">-- T-SQL equivalent</span>
+<span class="kw">SELECT</span> ISNULL(@name, <span class="str">'Unknown'</span>)
+<span class="kw">SELECT</span> COALESCE(@name, <span class="str">'Unknown'</span>)</code></pre>
+
+      <h3 style="margin-top:20px;"><code>??=</code> Null-Coalescing Assignment</h3>
+      <pre><code><span class="tp">string</span>? name = <span class="kw">null</span>;
+name ??= <span class="str">"Default"</span>;
+<span class="cm">// Sets name to "Default" ONLY if null</span></code></pre>
+    </div>
+    <div class="column">
+      <h3><code>?.</code> Null-Conditional</h3>
+      <pre><code><span class="tp">string</span>? name = <span class="kw">null</span>;
+
+<span class="cm">// WITHOUT ?. -- CRASH!</span>
+<span class="cm">// int len = name.Length;</span>
+
+<span class="cm">// WITH ?. -- safe, returns null</span>
+<span class="tp">int</span>? len = name?.Length;  <span class="cm">// null</span>
+
+<span class="cm">// Combine with ?? for default</span>
+<span class="tp">int</span> safe = name?.Length ?? <span class="nm">0</span>;
+<span class="cm">// safe = 0</span></code></pre>
+
+      <h3 style="margin-top:20px;">Chaining</h3>
+      <pre><code><span class="tp">string</span> city = customer?.Address?.City
+               ?? <span class="str">"N/A"</span>;</code></pre>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SLIDE 12: Type Conversion ===== -->
+<div class="slide" data-slide="12">
+  <h2>Type Conversion &mdash; CAST and TRY_CAST</h2>
+  <table>
+    <tr><th>C# Method</th><th>Behavior</th><th>SQL Equivalent</th></tr>
+    <tr><td><code>(int)3.14</code></td><td>Direct cast &mdash; truncates</td><td>Implicit conversion</td></tr>
+    <tr><td><code>Convert.ToInt32("123")</code></td><td>Throws on invalid input</td><td><code>CAST(@x AS INT)</code></td></tr>
+    <tr><td><code>int.Parse("123")</code></td><td>Throws on invalid input</td><td><code>CAST(@str AS INT)</code></td></tr>
+    <tr><td style="color:var(--green)"><code>int.TryParse("123", out int r)</code></td><td style="color:var(--green)">Returns <code>bool</code>, no exception</td><td style="color:var(--green)"><code>TRY_CAST(@str AS INT)</code></td></tr>
+  </table>
+  <div class="code-runner" style="margin-top:16px;">
+    <div class="code-runner-header"><span>TryParse &mdash; Safe Parsing</span><button class="run-btn" onclick="simulateRun(this,'tryparse')">&#9654; Run</button></div>
+    <pre><code><span class="cm">// Safe: returns true/false instead of throwing</span>
+<span class="kw">if</span> (<span class="tp">decimal</span>.TryParse(<span class="str">"45000.50"</span>, <span class="kw">out</span> <span class="tp">decimal</span> amount))
+    Console.WriteLine(<span class="str">$"Parsed: {amount:N2}"</span>);
+
+<span class="kw">if</span> (!<span class="tp">decimal</span>.TryParse(<span class="str">"not-a-number"</span>, <span class="kw">out</span> <span class="tp">decimal</span> bad))
+    Console.WriteLine(<span class="str">"Invalid input!"</span>);</code></pre>
+    <div class="code-output" id="tryparse">Parsed: 45,000.50
+Invalid input!</div>
+  </div>
+  <div class="highlight-box green" style="margin-top:12px;">
+    <p><strong>Best practice:</strong> Always use <code>TryParse</code> for user input. Never trust external data.</p>
+  </div>
+</div>
+
+<!-- ===== SLIDE 13: String Operations ===== -->
+<div class="slide" data-slide="13">
+  <h2>String Operations &mdash; SQL to C#</h2>
+  <table style="font-size:0.95em;">
+    <tr><th>C#</th><th>T-SQL</th><th>Example</th></tr>
+    <tr><td><code>str.Length</code></td><td><code>LEN(@str)</code></td><td><code>"hello".Length</code> &rarr; <code>5</code></td></tr>
+    <tr><td><code>str.ToUpper()</code></td><td><code>UPPER(@str)</code></td><td><code>"hello".ToUpper()</code> &rarr; <code>"HELLO"</code></td></tr>
+    <tr><td><code>str.ToLower()</code></td><td><code>LOWER(@str)</code></td><td><code>"HELLO".ToLower()</code> &rarr; <code>"hello"</code></td></tr>
+    <tr><td><code>str.Trim()</code></td><td><code>TRIM(@str)</code></td><td><code>"  hi  ".Trim()</code> &rarr; <code>"hi"</code></td></tr>
+    <tr><td><code>str.Substring(1, 3)</code></td><td><code>SUBSTRING(@str, 2, 3)</code></td><td style="color:var(--orange)">C# is <strong>0-based!</strong></td></tr>
+    <tr><td><code>str.Contains("x")</code></td><td><code>CHARINDEX('x', @str) &gt; 0</code></td><td><code>"hello".Contains("ell")</code> &rarr; <code>true</code></td></tr>
+    <tr><td><code>str.Replace("a","b")</code></td><td><code>REPLACE(@str,'a','b')</code></td><td><code>"hello".Replace("l","r")</code> &rarr; <code>"herro"</code></td></tr>
+    <tr><td><code>str.Split(',')</code></td><td><code>STRING_SPLIT(@str,',')</code></td><td><code>"a,b,c".Split(',')</code> &rarr; <code>["a","b","c"]</code></td></tr>
+    <tr><td><code>string.Join(",",arr)</code></td><td><code>STRING_AGG(@col,',')</code></td><td><code>string.Join(",", new[]{"a","b"})</code> &rarr; <code>"a,b"</code></td></tr>
+  </table>
+  <div class="highlight-box orange" style="margin-top:12px;">
+    <p><strong>Critical:</strong> C# uses <strong>0-based indexing</strong>. First character is at position 0, not 1 like SQL's <code>SUBSTRING</code>.</p>
+  </div>
+</div>
+
+<!-- ===== SLIDE 14: String Formatting ===== -->
+<div class="slide" data-slide="14">
+  <h2>String Formatting &amp; Interpolation</h2>
+  <div class="code-runner">
+    <div class="code-runner-header"><span>Formatting examples</span><button class="run-btn" onclick="simulateRun(this,'formatting')">&#9654; Run</button></div>
+    <pre><code><span class="tp">decimal</span> balance = <span class="nm">1234567.891m</span>;
+<span class="tp">DateTime</span> now = DateTime.Now;
+
+<span class="cm">// Number formats</span>
+Console.WriteLine(<span class="str">$"Default:    {balance}"</span>);
+Console.WriteLine(<span class="str">$"Fixed 2:    {balance:F2}"</span>);
+Console.WriteLine(<span class="str">$"Thousands:  {balance:N2}"</span>);
+Console.WriteLine(<span class="str">$"Currency:   {balance:C}"</span>);
+
+<span class="cm">// Date formats</span>
+Console.WriteLine(<span class="str">$"Full:       {now}"</span>);
+Console.WriteLine(<span class="str">$"Date only:  {now:yyyy-MM-dd}"</span>);
+Console.WriteLine(<span class="str">$"Time only:  {now:HH:mm:ss}"</span>);
+Console.WriteLine(<span class="str">$"Custom:     {now:dd MMMM yyyy}"</span>);</code></pre>
+    <div class="code-output" id="formatting">Default:    1234567.891
+Fixed 2:    1234567.89
+Thousands:  1,234,567.89
+Currency:   $1,234,567.89
+Full:       3/23/2026 2:30:00 PM
+Date only:  2026-03-23
+Time only:  14:30:00
+Custom:     23 March 2026</div>
+  </div>
+  <table style="margin-top:8px; font-size:0.95em;">
+    <tr><th>Format</th><th>C#</th><th>T-SQL Equivalent</th></tr>
+    <tr><td>Currency</td><td><code>{amount:C}</code></td><td><code>FORMAT(amount, 'C')</code></td></tr>
+    <tr><td>Fixed decimals</td><td><code>{amount:F2}</code></td><td><code>CAST(amount AS DECIMAL(18,2))</code></td></tr>
+    <tr><td>Date</td><td><code>{date:yyyy-MM-dd}</code></td><td><code>FORMAT(date, 'yyyy-MM-dd')</code></td></tr>
+  </table>
+</div>
+
+<!-- ===== SLIDE 15: Constants ===== -->
+<div class="slide" data-slide="15">
+  <h2>Constants &mdash; <code>const</code> and <code>readonly</code></h2>
+  <pre><code><span class="cm">// const -- compile-time constant. Must know value when writing code.</span>
+<span class="kw">const</span> <span class="tp">decimal</span> MAX_TRANSFER = <span class="nm">100_000m</span>;
+<span class="kw">const</span> <span class="tp">string</span> DEFAULT_CURRENCY = <span class="str">"GEL"</span>;
+<span class="kw">const</span> <span class="tp">int</span> MAX_RETRIES = <span class="nm">3</span>;
+
+<span class="cm">// readonly -- runtime constant. Set once, then frozen.</span>
+<span class="kw">readonly</span> <span class="tp">DateTime</span> createdAt = DateTime.Now;  <span class="cm">// Evaluated at runtime</span>
+
+<span class="cm">// Cannot change after assignment</span>
+<span class="cm">// MAX_TRANSFER = 200_000m;  // COMPILE ERROR</span></code></pre>
+  <table style="margin-top:20px;">
+    <tr><th>Feature</th><th><code>const</code></th><th><code>readonly</code></th></tr>
+    <tr><td>Set when?</td><td>Compile time</td><td>Runtime (constructor)</td></tr>
+    <tr><td>Can use <code>DateTime.Now</code>?</td><td style="color:var(--red)">No</td><td style="color:var(--green)">Yes</td></tr>
+    <tr><td>Can change?</td><td style="color:var(--red)">Never</td><td style="color:var(--red)">Never (after set)</td></tr>
+    <tr><td>SQL analogy</td><td>Hard-coded value</td><td>No direct equivalent</td></tr>
+  </table>
+</div>
+
+<!-- ===== SLIDE 16: Live Demo ===== -->
+<div class="slide" data-slide="16">
+  <h2>Live Demo: Currency Converter</h2>
+  <div class="code-runner">
+    <div class="code-runner-header"><span>CurrencyConverter.cs</span><button class="run-btn" onclick="simulateRun(this,'converter')">&#9654; Run</button></div>
+    <pre><code>Console.WriteLine(<span class="str">"=== Currency Converter ==="</span>);
+
+<span class="kw">const</span> <span class="tp">decimal</span> GEL_TO_USD = <span class="nm">0.37m</span>;
+<span class="kw">const</span> <span class="tp">decimal</span> GEL_TO_EUR = <span class="nm">0.34m</span>;
+
+Console.Write(<span class="str">"Enter amount in GEL: "</span>);
+<span class="tp">string</span>? input = Console.ReadLine();
+
+<span class="kw">if</span> (<span class="tp">decimal</span>.TryParse(input, <span class="kw">out</span> <span class="tp">decimal</span> gelAmount))
+{
+    <span class="tp">decimal</span> usd = gelAmount * GEL_TO_USD;
+    <span class="tp">decimal</span> eur = gelAmount * GEL_TO_EUR;
+
+    Console.WriteLine(<span class="str">$"\n{gelAmount:N2} GEL ="</span>);
+    Console.WriteLine(<span class="str">$"  {usd:N2} USD"</span>);
+    Console.WriteLine(<span class="str">$"  {eur:N2} EUR"</span>);
+}
+<span class="kw">else</span>
+    Console.WriteLine(<span class="str">"Invalid amount!"</span>);</code></pre>
+    <div class="code-output" id="converter">=== Currency Converter ===
+Enter amount in GEL: 10000
+
+10,000.00 GEL =
+  3,700.00 USD
+  3,400.00 EUR</div>
+  </div>
+</div>
+
+<!-- ===== SLIDE 17: Quiz 1 ===== -->
+<div class="slide" data-slide="17">
+  <h2>Knowledge Check</h2>
+  <p style="margin-bottom:20px;"><strong>Q: What is the output of this code?</strong></p>
+  <pre style="margin-bottom:20px;"><code><span class="tp">string</span>? city = <span class="kw">null</span>;
+<span class="tp">int</span> length = city?.Length ?? <span class="nm">-1</span>;
+Console.WriteLine(length);</code></pre>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'q1')">A) <code>0</code></div>
+  <div class="quiz-option" onclick="checkQuiz(this, true, 'q1')">B) <code>-1</code></div>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'q1')">C) Throws NullReferenceException</div>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'q1')">D) Compile error</div>
+  <div class="quiz-feedback correct" id="q1-correct">Correct! <code>city?.Length</code> returns <code>null</code> because <code>city</code> is null (safe navigation). Then <code>?? -1</code> provides the default value <code>-1</code>.</div>
+  <div class="quiz-feedback wrong" id="q1-wrong">Not quite. <code>city?.Length</code> safely returns <code>null</code> (no crash). Then <code>?? -1</code> kicks in, giving us <code>-1</code>.</div>
+</div>
+
+<!-- ===== SLIDE 18: Quiz 2 ===== -->
+<div class="slide" data-slide="18">
+  <h2>Knowledge Check</h2>
+  <p style="margin-bottom:20px;"><strong>Q: Which C# type should you use for a bank account balance?</strong></p>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'q2')">A) <code>double</code> &mdash; it has more range</div>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'q2')">B) <code>float</code> &mdash; it uses less memory</div>
+  <div class="quiz-option" onclick="checkQuiz(this, true, 'q2')">C) <code>decimal</code> &mdash; exact precision for financial data</div>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'q2')">D) <code>int</code> &mdash; store as minor units (cents)</div>
+  <div class="quiz-feedback correct" id="q2-correct">Correct! <code>decimal</code> provides exact arithmetic for financial calculations. <code>double</code> and <code>float</code> have floating-point precision errors (0.1 + 0.2 &ne; 0.3).</div>
+  <div class="quiz-feedback wrong" id="q2-wrong"><code>decimal</code> is the correct answer. <code>double</code> and <code>float</code> have floating-point errors: <code>0.1 + 0.2 = 0.30000000000000004</code>. Always use <code>decimal</code> for money.</div>
+</div>
+
+<!-- ===== SLIDE 19: Quiz 3 ===== -->
+<div class="slide" data-slide="19">
+  <h2>Knowledge Check</h2>
+  <p style="margin-bottom:20px;"><strong>Q: What happens here?</strong></p>
+  <pre style="margin-bottom:20px;"><code><span class="tp">int</span> a = <span class="nm">10</span>;
+<span class="tp">int</span> b = a;
+b = <span class="nm">99</span>;
+Console.WriteLine(a);</code></pre>
+  <div class="quiz-option" onclick="checkQuiz(this, true, 'q3')">A) Prints <code>10</code> &mdash; <code>int</code> is a value type, <code>b</code> got a copy</div>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'q3')">B) Prints <code>99</code> &mdash; <code>b</code> is a reference to <code>a</code></div>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'q3')">C) Compile error &mdash; can't reassign <code>b</code></div>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'q3')">D) Prints <code>0</code> &mdash; <code>a</code> was reset</div>
+  <div class="quiz-feedback correct" id="q3-correct">Correct! <code>int</code> is a value type. <code>b = a</code> copies the value 10 into a separate box. Changing <code>b</code> doesn't affect <code>a</code>.</div>
+  <div class="quiz-feedback wrong" id="q3-wrong"><code>int</code> is a value type &mdash; <code>b = a</code> copies the value, not a reference. <code>a</code> remains <code>10</code>. This would be different with reference types (arrays, classes).</div>
+</div>
+
+<!-- ===== SLIDE 20: Homework ===== -->
+<div class="slide" data-slide="20">
+  <h2>Before Session 3</h2>
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-content"><p><strong>Complete the Currency Converter exercise</strong> &mdash; with input validation, multiple currencies, and formatted output</p></div>
+  </div>
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-content"><p><strong>Experiment with null operators</strong> &mdash; try <code>??</code>, <code>?.</code>, and <code>??=</code> in your own console app</p></div>
+  </div>
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-content"><p><strong>String exercise:</strong> Parse and format raw transaction data using <code>Split</code>, <code>Trim</code>, <code>TryParse</code></p></div>
+  </div>
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-content"><p><strong>Read:</strong> <em>C# 12 in a Nutshell</em> &mdash; Chapter 2 (types, operators)</p></div>
+  </div>
+  <div class="highlight-box" style="margin-top:20px;">
+    <p><strong>Session 3 Preview:</strong> Control Flow and Methods &mdash; <code>if/else</code>, <code>switch</code>, loops, and methods. You'll rewrite a T-SQL fee calculation procedure as C# methods.</p>
+  </div>
+</div>
+
+<!-- ===== SLIDE 21: Summary ===== -->
+<div class="slide" data-slide="21">
+  <h2>Session 2 Summary</h2>
+  <table>
+    <tr><th>Concept</th><th>Key Takeaway</th></tr>
+    <tr><td>Type mapping</td><td>INT&rarr;<code>int</code>, DECIMAL&rarr;<code>decimal</code>, NVARCHAR&rarr;<code>string</code>, BIT&rarr;<code>bool</code>, DATETIME&rarr;<code>DateTime</code></td></tr>
+    <tr><td><code>decimal</code></td><td>Always use for money. Never <code>float</code>/<code>double</code>. Use <code>m</code> suffix.</td></tr>
+    <tr><td>Value vs Reference</td><td>Value = IS the data (int, decimal). Reference = POINTS to data (arrays, classes).</td></tr>
+    <tr><td><code>var</code></td><td>Compiler infers type. Still strictly typed.</td></tr>
+    <tr><td><code>==</code> vs <code>=</code></td><td><code>=</code> is assignment, <code>==</code> is comparison. Two symbols!</td></tr>
+    <tr><td><code>??</code></td><td>Null-coalescing = ISNULL / COALESCE</td></tr>
+    <tr><td><code>?.</code></td><td>Null-conditional = safe member access (no SQL equivalent)</td></tr>
+    <tr><td>TryParse</td><td>Safe parsing = TRY_CAST. Always use for user input.</td></tr>
+    <tr><td>Strings</td><td>Always Unicode. 0-based indexing. Immutable. Rich methods.</td></tr>
+    <tr><td>Formatting</td><td><code>$"{amount:N2}"</code> = FORMAT in SQL. Use interpolation for everything.</td></tr>
+  </table>
+</div>
+
+</div><!-- /slide-container -->
+
+<div class="nav">
+  <button id="prevBtn" onclick="navigate(-1)" disabled>&#8592;</button>
+  <span class="slide-counter" id="slideCounter">1 / 21</span>
+  <button id="nextBtn" onclick="navigate(1)">&#8594;</button>
+</div>
+<div class="keyboard-hints"><kbd>&#8592;</kbd> <kbd>&#8594;</kbd> Navigate &nbsp;&bull;&nbsp; <kbd>Space</kbd> Next &nbsp;&bull;&nbsp; <kbd>R</kbd> Reveal items</div>
+
+<script>
+  let currentSlide = 1;
+  const totalSlides = document.querySelectorAll('.slide').length;
+  function showSlide(n) {
+    document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+    const t = document.querySelector(`[data-slide="${n}"]`);
+    if (t) { t.classList.add('active'); currentSlide = n; updateUI(); revealItems(); }
+  }
+  function navigate(d) { const n = currentSlide + d; if (n >= 1 && n <= totalSlides) showSlide(n); }
+  function updateUI() {
+    document.getElementById('slideCounter').textContent = `${currentSlide} / ${totalSlides}`;
+    document.getElementById('prevBtn').disabled = currentSlide === 1;
+    document.getElementById('nextBtn').disabled = currentSlide === totalSlides;
+    document.getElementById('progressBar').style.width = `${(currentSlide / totalSlides) * 100}%`;
+  }
+  function revealItems() {
+    const items = document.querySelector('.slide.active').querySelectorAll('.reveal-item:not(.visible)');
+    items.forEach((item, i) => setTimeout(() => item.classList.add('visible'), 200 * (i + 1)));
+  }
+  function simulateRun(btn, id) {
+    btn.textContent = '⏳ Running...'; btn.disabled = true;
+    setTimeout(() => {
+      document.getElementById(id).classList.add('show');
+      btn.textContent = '✓ Done';
+      setTimeout(() => { btn.textContent = '▶ Run'; btn.disabled = false; }, 2000);
+    }, 800);
+  }
+  function checkQuiz(el, correct, qid) {
+    const s = el.closest('.slide');
+    s.querySelectorAll('.quiz-option').forEach(o => { o.classList.remove('correct','wrong'); o.style.pointerEvents = 'none'; });
+    s.querySelectorAll('.quiz-feedback').forEach(f => f.classList.remove('show'));
+    el.classList.add(correct ? 'correct' : 'wrong');
+    document.getElementById(qid + (correct ? '-correct' : '-wrong')).classList.add('show');
+    setTimeout(() => s.querySelectorAll('.quiz-option').forEach(o => o.style.pointerEvents = 'auto'), 3000);
+  }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); navigate(1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); navigate(-1); }
+    if (e.key === 'r' || e.key === 'R') revealItems();
+    if (e.key === 'Home') showSlide(1);
+    if (e.key === 'End') showSlide(totalSlides);
+  });
+  let touchX = 0;
+  document.addEventListener('touchstart', e => touchX = e.touches[0].clientX);
+  document.addEventListener('touchend', e => { const d = touchX - e.changedTouches[0].clientX; if (Math.abs(d) > 50) navigate(d > 0 ? 1 : -1); });
+  updateUI(); revealItems();
+</script>
+</body>
+</html>
