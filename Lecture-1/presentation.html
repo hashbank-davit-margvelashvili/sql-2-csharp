@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Session 1: Welcome to .NET — The Ecosystem and Your First Program</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface2: #334155;
+    --accent: #3b82f6;
+    --accent2: #8b5cf6;
+    --text: #e2e8f0;
+    --text-dim: #94a3b8;
+    --green: #22c55e;
+    --orange: #f59e0b;
+    --red: #ef4444;
+    --cyan: #06b6d4;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  /* Progress bar */
+  .progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.4s ease;
+    z-index: 100;
+  }
+
+  /* Slide container */
+  .slide-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 80px;
+  }
+
+  .slide {
+    display: none;
+    width: 100%;
+    max-width: 1100px;
+    animation: fadeIn 0.4s ease;
+  }
+
+  .slide.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Typography */
+  h1 {
+    font-size: 2.8em;
+    font-weight: 700;
+    margin-bottom: 12px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  h2 {
+    font-size: 2.2em;
+    font-weight: 600;
+    margin-bottom: 30px;
+    color: var(--text);
+  }
+
+  h3 {
+    font-size: 1.3em;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--accent);
+  }
+
+  .subtitle {
+    font-size: 1.3em;
+    color: var(--text-dim);
+    margin-bottom: 40px;
+  }
+
+  p, li {
+    font-size: 1.15em;
+    line-height: 1.7;
+    color: var(--text);
+  }
+
+  ul { list-style: none; padding: 0; }
+
+  ul li {
+    padding: 8px 0 8px 28px;
+    position: relative;
+  }
+
+  ul li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: bold;
+  }
+
+  /* Code blocks */
+  pre {
+    background: var(--surface);
+    border: 1px solid var(--surface2);
+    border-radius: 12px;
+    padding: 20px 24px;
+    overflow-x: auto;
+    margin: 16px 0;
+    font-size: 0.95em;
+  }
+
+  code {
+    font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.95em;
+  }
+
+  pre code { color: var(--text); }
+
+  .keyword { color: var(--accent); }
+  .string { color: var(--green); }
+  .comment { color: var(--text-dim); font-style: italic; }
+  .type { color: var(--cyan); }
+  .number { color: var(--orange); }
+
+  /* Inline code */
+  :not(pre) > code {
+    background: var(--surface);
+    padding: 3px 8px;
+    border-radius: 6px;
+    color: var(--cyan);
+  }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 1.05em;
+  }
+
+  th {
+    background: var(--surface2);
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--accent);
+    border-bottom: 2px solid var(--accent);
+  }
+
+  td {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--surface2);
+  }
+
+  tr:hover td { background: var(--surface); }
+
+  /* Two-column layout */
+  .columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: start;
+  }
+
+  .column { }
+
+  /* Highlight box */
+  .highlight-box {
+    background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(139,92,246,0.1));
+    border: 1px solid rgba(59,130,246,0.3);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin: 16px 0;
+  }
+
+  .highlight-box.green {
+    background: linear-gradient(135deg, rgba(34,197,94,0.1), rgba(6,182,212,0.1));
+    border-color: rgba(34,197,94,0.3);
+  }
+
+  .highlight-box.orange {
+    background: linear-gradient(135deg, rgba(245,158,11,0.1), rgba(239,68,68,0.1));
+    border-color: rgba(245,158,11,0.3);
+  }
+
+  /* Analogy callout */
+  .analogy {
+    background: var(--surface);
+    border-left: 4px solid var(--orange);
+    border-radius: 0 12px 12px 0;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: 1.1em;
+  }
+
+  .analogy::before {
+    content: '🔗 SQL Analogy: ';
+    color: var(--orange);
+    font-weight: 600;
+  }
+
+  /* Step indicators */
+  .step {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin: 12px 0;
+  }
+
+  .step-num {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1em;
+  }
+
+  .step-content { padding-top: 5px; }
+
+  /* Interactive elements */
+  .quiz-option {
+    background: var(--surface);
+    border: 2px solid var(--surface2);
+    border-radius: 10px;
+    padding: 14px 20px;
+    margin: 8px 0;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 1.05em;
+  }
+
+  .quiz-option:hover { border-color: var(--accent); background: var(--surface2); }
+  .quiz-option.correct { border-color: var(--green); background: rgba(34,197,94,0.15); }
+  .quiz-option.wrong { border-color: var(--red); background: rgba(239,68,68,0.1); }
+
+  .quiz-feedback {
+    margin-top: 12px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    display: none;
+    font-size: 1.05em;
+  }
+
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.correct { background: rgba(34,197,94,0.15); color: var(--green); }
+  .quiz-feedback.wrong { background: rgba(239,68,68,0.1); color: var(--red); }
+
+  /* Interactive code runner */
+  .code-runner {
+    background: var(--surface);
+    border: 1px solid var(--surface2);
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 16px 0;
+  }
+
+  .code-runner-header {
+    background: var(--surface2);
+    padding: 8px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9em;
+    color: var(--text-dim);
+  }
+
+  .run-btn {
+    background: var(--green);
+    color: white;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9em;
+    transition: all 0.2s;
+  }
+
+  .run-btn:hover { opacity: 0.85; transform: scale(1.02); }
+
+  .code-runner pre {
+    margin: 0;
+    border: none;
+    border-radius: 0;
+  }
+
+  .code-output {
+    border-top: 1px solid var(--surface2);
+    padding: 12px 16px;
+    font-family: 'Cascadia Code', monospace;
+    font-size: 0.9em;
+    color: var(--green);
+    display: none;
+    white-space: pre-wrap;
+  }
+
+  .code-output.show { display: block; }
+
+  /* Diagram / flow */
+  .flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 20px 0;
+  }
+
+  .flow-box {
+    background: var(--surface);
+    border: 2px solid var(--accent);
+    border-radius: 10px;
+    padding: 12px 20px;
+    font-weight: 600;
+    text-align: center;
+    min-width: 120px;
+  }
+
+  .flow-box.sql { border-color: var(--orange); }
+  .flow-box.csharp { border-color: var(--accent); }
+
+  .flow-arrow {
+    color: var(--text-dim);
+    font-size: 1.5em;
+    font-weight: bold;
+  }
+
+  /* Navigation */
+  .nav {
+    position: fixed;
+    bottom: 30px;
+    right: 40px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    z-index: 50;
+  }
+
+  .nav button {
+    background: var(--surface);
+    border: 1px solid var(--surface2);
+    color: var(--text);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2em;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav button:hover { background: var(--accent); border-color: var(--accent); }
+  .nav button:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .slide-counter {
+    color: var(--text-dim);
+    font-size: 0.95em;
+    min-width: 60px;
+    text-align: center;
+  }
+
+  /* Title slide special */
+  .title-slide {
+    text-align: center;
+  }
+
+  .title-slide h1 { font-size: 3.2em; margin-bottom: 8px; }
+  .title-slide .subtitle { font-size: 1.5em; }
+
+  .session-info {
+    display: inline-flex;
+    gap: 24px;
+    margin-top: 40px;
+    color: var(--text-dim);
+    font-size: 1em;
+  }
+
+  .session-info span {
+    background: var(--surface);
+    padding: 8px 20px;
+    border-radius: 20px;
+    border: 1px solid var(--surface2);
+  }
+
+  /* Reveal animation */
+  .reveal-item {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+  }
+
+  .reveal-item.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Keyboard hints */
+  .keyboard-hints {
+    position: fixed;
+    bottom: 30px;
+    left: 40px;
+    color: var(--text-dim);
+    font-size: 0.85em;
+    z-index: 50;
+  }
+
+  kbd {
+    background: var(--surface);
+    border: 1px solid var(--surface2);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.9em;
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .slide-container { padding: 20px 30px; }
+    .columns { grid-template-columns: 1fr; gap: 20px; }
+    h1 { font-size: 2em; }
+    h2 { font-size: 1.6em; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- ============================================= -->
+<!-- SLIDE 1: Title -->
+<!-- ============================================= -->
+<div class="slide-container">
+<div class="slide active title-slide" data-slide="1">
+  <p style="font-size: 1em; color: var(--accent); letter-spacing: 3px; margin-bottom: 16px;">SESSION 1</p>
+  <h1>Welcome to .NET</h1>
+  <p class="subtitle">The Ecosystem and Your First Program</p>
+  <p style="color: var(--text-dim); font-size: 1.1em; margin-top: 20px;">
+    SQL-to-.NET Developer Transition Program
+  </p>
+  <div class="session-info">
+    <span>Phase 1 / Block A</span>
+    <span>2 hours</span>
+    <span>.NET 10 &bull; C# 14</span>
+  </div>
+</div>
+
+<!-- ============================================= -->
+<!-- SLIDE 2: Learning Objectives -->
+<!-- ============================================= -->
+<div class="slide" data-slide="2">
+  <h2>Learning Objectives</h2>
+  <p style="color: var(--text-dim); margin-bottom: 24px;">By the end of this session, you will be able to:</p>
+  <div class="step reveal-item">
+    <div class="step-num">1</div>
+    <div class="step-content">
+      <p><strong>Understand the .NET runtime</strong> (CLR, JIT, IL) and how it compares to SQL Server's query engine compiling T-SQL</p>
+    </div>
+  </div>
+  <div class="step reveal-item">
+    <div class="step-num">2</div>
+    <div class="step-content">
+      <p><strong>Set up your development environment</strong> &mdash; Visual Studio, .NET 10 SDK, Git</p>
+    </div>
+  </div>
+  <div class="step reveal-item">
+    <div class="step-num">3</div>
+    <div class="step-content">
+      <p><strong>Write, compile, and run</strong> a C# console application from scratch</p>
+    </div>
+  </div>
+  <div class="step reveal-item">
+    <div class="step-num">4</div>
+    <div class="step-content">
+      <p><strong>Identify HSP stored procedures</strong> that are candidates for microservice extraction</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================= -->
+<!-- SLIDE 3: The Big Picture -->
+<!-- ============================================= -->
+<div class="slide" data-slide="3">
+  <h2>The Big Picture</h2>
+  <p style="margin-bottom: 20px;">You already know a runtime. You just call it "SQL Server".</p>
+  <div class="analogy">
+    SQL Server is a runtime for T-SQL. The CLR is a runtime for C#. The concept is the same &mdash; only the language changes.
+  </div>
+  <table style="margin-top: 24px;">
+    <tr><th>SQL Server</th><th>.NET</th></tr>
+    <tr><td>SQL Server Engine</td><td>CLR (Common Language Runtime)</td></tr>
+    <tr><td>T-SQL source code</td><td>C# source code</td></tr>
+    <tr><td>Execution Plan</td><td>IL (Intermediate Language)</td></tr>
+    <tr><td>Query Optimizer</td><td>JIT (Just-In-Time) Compiler</td></tr>
+    <tr><td>SSMS</td><td>Visual Studio</td></tr>
+    <tr><td>SQL Server 2022</td><td>.NET 10</td></tr>
+  </table>
+</div>
+
+<!-- ============================================= -->
+<!-- SLIDE 4: How Code Executes -->
+<!-- ============================================= -->
+<div class="slide" data-slide="4">
+  <h2>How Code Executes</h2>
+  <div class="columns">
+    <div class="column">
+      <h3>SQL Server Pipeline</h3>
+      <div class="flow" style="flex-direction: column; align-items: stretch;">
+        <div class="flow-box sql">T-SQL Code</div>
+        <div class="flow-arrow" style="text-align: center;">&#8595;</div>
+        <div class="flow-box sql">Parser</div>
+        <div class="flow-arrow" style="text-align: center;">&#8595;</div>
+        <div class="flow-box sql">Query Optimizer</div>
+        <div class="flow-arrow" style="text-align: center;">&#8595;</div>
+        <div class="flow-box sql">Execution Plan</div>
+        <div class="flow-arrow" style="text-align: center;">&#8595;</div>
+        <div class="flow-box sql">Results</div>
+      </div>
+    </div>
+    <div class="column">
+      <h3>C# / .NET Pipeline</h3>
+      <div class="flow" style="flex-direction: column; align-items: stretch;">
+        <div class="flow-box csharp">C# Code</div>
+        <div class="flow-arrow" style="text-align: center;">&#8595;</div>
+        <div class="flow-box csharp">C# Compiler</div>
+        <div class="flow-arrow" style="text-align: center;">&#8595;</div>
+        <div class="flow-box csharp">IL (Intermediate Language)</div>
+        <div class="flow-arrow" style="text-align: center;">&#8595;</div>
+        <div class="flow-box csharp">JIT Compiler</div>
+        <div class="flow-arrow" style="text-align: center;">&#8595;</div>
+        <div class="flow-box csharp">Machine Code &rarr; Runs</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================= -->
+<!-- SLIDE 5: .NET 10 -->
+<!-- ============================================= -->
+<div class="slide" data-slide="5">
+  <h2>.NET 10 &mdash; Why This Version?</h2>
+  <table>
+    <tr><th>Version</th><th>Release</th><th>Support</th><th>Status</th></tr>
+    <tr><td>.NET 8</td><td>Nov 2023</td><td style="color: var(--green)">LTS (3 years)</td><td>Active</td></tr>
+    <tr><td>.NET 9</td><td>Nov 2024</td><td>STS (18 months)</td><td>Active</td></tr>
+    <tr style="background: rgba(59,130,246,0.1)"><td><strong>.NET 10</strong></td><td>Nov 2025</td><td style="color: var(--green)"><strong>LTS (3 years)</strong></td><td><strong>We use this</strong></td></tr>
+  </table>
+  <div class="highlight-box" style="margin-top: 24px;">
+    <p><strong>Why LTS?</strong> In banking, stability matters. LTS versions receive security patches for 3 years. .NET 10 ships with <strong>C# 14</strong>, the latest language version.</p>
+  </div>
+  <div class="analogy">
+    .NET 10 is to C# what SQL Server 2022 is to T-SQL &mdash; the runtime determines which language features are available.
+  </div>
+</div>
+
+<!-- ============================================= -->
+<!-- SLIDE 6: Key Components -->
+<!-- ============================================= -->
+<div class="slide" data-slide="6">
+  <h2>Key .NET Components</h2>
+  <div class="columns">
+    <div class="column">
+      <div class="highlight-box" style="margin-bottom: 16px;">
+        <h3>CLR</h3>
+        <p>Common Language Runtime &mdash; the engine that runs your code. Handles memory, type safety, exceptions.</p>
+      </div>
+      <div class="highlight-box green" style="margin-bottom: 16px;">
+        <h3>BCL</h3>
+        <p>Base Class Library &mdash; pre-built code for I/O, networking, collections, JSON, crypto. Like built-in system procedures.</p>
+      </div>
+    </div>
+    <div class="column">
+      <div class="highlight-box orange" style="margin-bottom: 16px;">
+        <h3>SDK</h3>
+        <p>Software Development Kit &mdash; the compiler, <code>dotnet</code> CLI, project templates, NuGet package manager.</p>
+      </div>
+      <div class="highlight-box" style="margin-bottom: 16px;">
+        <h3>Runtime</h3>
+        <p>The minimal components to <strong>run</strong> an app (CLR + BCL). In production, you only need this &mdash; not the full SDK.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================= -->
+<!-- SLIDE 7: Managed Code -->
+<!-- ============================================= -->
+<div class="slide" data-slide="7">
+  <h2>Managed Code</h2>
+  <p>C# code on the CLR is called <strong>managed code</strong> because the runtime <em>manages</em> it:</p>
+  <ul style="margin-top: 20px;">
+    <li><strong>Memory</strong> is automatically allocated and freed (garbage collection)</li>
+    <li><strong>Array bounds</strong> are checked at runtime (no buffer overflows)</li>
+    <li><strong>Type safety</strong> is enforced at compile time</li>
+    <li><strong>Exceptions</strong> are structured and propagated safely</li>
+  </ul>
+  <div class="analogy" style="margin-top: 24px;">
+    In SQL Server, you never manually manage memory &mdash; the engine handles it. .NET works the same way. You focus on business logic, not memory allocation.
+  </div>
+  <div class="highlight-box" style="margin-top: 16px;">
+    <p><strong>.NET vs .NET Framework:</strong> When someone says ".NET" without a version, they mean modern .NET (5+). ".NET Framework" (1.0&ndash;4.8) is the legacy Windows-only version. We use <strong>modern .NET 10</strong>.</p>
+  </div>
+</div>
+
+<!-- ============================================= -->
+<!-- SLIDE 8: Project Structure -->
+<!-- ============================================= -->
+<div class="slide" data-slide="8">
+  <h2>Project Structure &mdash; The SQL Analogy</h2>
+  <div class="columns">
+    <div class="column">
+      <h3>SQL Server</h3>
+      <pre><code><span class="comment">SQL Server Instance</span>
+  └── <span class="type">Database</span> (HSP_Core)
+        ├── <span class="keyword">Schema:</span> dbo
+        │     ├── Tables
+        │     └── Stored Procedures
+        └── <span class="keyword">Schema:</span> payments
+              ├── Tables
+              └── Stored Procedures</code></pre>
+    </div>
+    <div class="column">
+      <h3>.NET</h3>
+      <pre><code><span class="comment">Development Machine</span>
+  └── <span class="type">Solution</span> (.sln)
+        ├── <span class="keyword">Project:</span> HSP.Models
+        │     ├── Transaction.cs
+        │     └── Account.cs
+        └── <span class="keyword">Project:</span> HSP.Services
+              └── TransactionService.cs</code></pre>
+    </div>
+  </div>
+  <table style="margin-top: 16px;">
+    <tr><th>SQL Server</th><th>.NET</th><th>Purpose</th></tr>
+    <tr><td>Database</td><td>Solution (.sln)</td><td>Top-level container</td></tr>
+    <tr><td>Schema</td><td>Project (.csproj) / Namespace</td><td>Logical grouping</td></tr>
+    <tr><td>Table</td><td>Class (.cs)</td><td>Structure definition</td></tr>
+    <tr><td>Stored Procedure</td><td>Method</td><td>A block of executable code</td></tr>
+  </table>
+</div>
+
+<!-- ============================================= -->
+<!-- SLIDE 9: dotnet CLI -->
+<!-- ============================================= -->
+<div class="slide" data-slide="9">
+  <h2>The <code>dotnet</code> CLI</h2>
+  <p style="margin-bottom: 20px;">Your command-line interface for .NET &mdash; like <code>sqlcmd</code> for SQL Server.</p>
+  <table>
+    <tr><th>Command</th><th>What It Does</th><th>SQL Analogy</th></tr>
+    <tr><td><code>dotnet new console</code></td><td>Create a new console project</td><td><code>CREATE DATABASE</code></td></tr>
+    <tr><td><code>dotnet build</code></td><td>Compile the code</td><td>Compiling a stored procedure</td></tr>
+    <tr><td><code>dotnet run</code></td><td>Build and execute</td><td><code>EXEC dbo.MyProcedure</code></td></tr>
+    <tr><td><code>dotnet add package</code></td><td>Add a NuGet package</td><td>Adding a CLR assembly</td></tr>
+    <tr><td><code>dotnet test</code></td><td>Run automated tests</td><td>Running a test script</td></tr>
+  </table>
+  <div class="code-runner" style="margin-top: 20px;">
+    <div class="code-runner-header">
+      <span>Terminal</span>
+      <button class="run-btn" onclick="simulateRun(this, 'dotnet-new')">&#9654; Simulate</button>
+    </div>
+    <pre><code>$ dotnet new console -n HelloBanking
+$ cd HelloBanking
+$ dotnet run</code></pre>
+    <div class="code-output" id="dotnet-new">The template "Console App" was created successfully.
+
+Hello, World!</div>
+  </div>
+</div>
+
+<!-- ============================================= -->
+<!-- SLIDE 10: Program.cs -->
+<!-- ============================================= -->
+<div class="slide" data-slide="10">
+  <h2>Program.cs &mdash; Your Entry Point</h2>
+  <div class="columns">
+    <div class="column">
+      <h3>C# (Top-level statements)</h3>
+      <pre><code><span class="comment">// Program.cs - the simplest C# program</span>
+<span class="type">Console</span>.<span class="keyword">WriteLine</span>(<span class="string">"Hello, Banking World!"</span>);</code></pre>
+      <p style="color: var(--text-dim); margin-top: 12px; font-size: 0.95em;">One line. That's the whole program. The compiler wraps it in a class and <code>Main</code> method automatically.</p>
+    </div>
+    <div class="column">
+      <h3>T-SQL equivalent</h3>
+      <pre><code><span class="comment">-- The T-SQL equivalent</span>
+<span class="keyword">PRINT</span> <span class="string">'Hello, Banking World!'</span></code></pre>
+      <p style="color: var(--text-dim); margin-top: 12px; font-size: 0.95em;">SQL Server lets you run statements without wrapping them in a procedure. C# does the same with top-level statements.</p>
+    </div>
+  </div>
+  <div class="highlight-box" style="margin-top: 20px;">
+    <p><strong>Behind the scenes,</strong> the compiler generates:</p>
+    <pre style="margin-top: 8px;"><code><span class="keyword">internal class</span> <span class="type">Program</span> {
+    <span class="keyword">static void</span> <span class="type">Main</span>(<span class="type">string</span>[] args) {
+        <span class="type">Console</span>.<span class="keyword">WriteLine</span>(<span class="string">"Hello, Banking World!"</span>);
+    }
+}</code></pre>
+  </div>
+</div>
+
+<!-- ============================================= -->
+<!-- SLIDE 11: String Interpolation -->
+<!-- ============================================= -->
+<div class="slide" data-slide="11">
+  <h2>String Interpolation</h2>
+  <p style="margin-bottom: 20px;">Building strings in C# vs T-SQL:</p>
+  <div class="columns">
+    <div class="column">
+      <h3>T-SQL (concatenation)</h3>
+      <pre><code><span class="keyword">DECLARE</span> @name <span class="type">NVARCHAR</span>(<span class="number">50</span>) = <span class="string">'TBC Bank'</span>
+<span class="keyword">DECLARE</span> @amount <span class="type">DECIMAL</span>(<span class="number">18</span>,<span class="number">2</span>) = <span class="number">15000.50</span>
+
+<span class="keyword">PRINT</span> <span class="string">'Bank: '</span> + @name +
+      <span class="string">', Amount: '</span> +
+      <span class="keyword">CAST</span>(@amount <span class="keyword">AS</span> <span class="type">NVARCHAR</span>(<span class="number">20</span>))</code></pre>
+    </div>
+    <div class="column">
+      <h3>C# (interpolation with <code>$</code>)</h3>
+      <pre><code><span class="type">string</span> name = <span class="string">"TBC Bank"</span>;
+<span class="type">decimal</span> amount = <span class="number">15000.50m</span>;
+
+<span class="type">Console</span>.<span class="keyword">WriteLine</span>(
+  <span class="string">$"Bank: {name}, Amount: {amount}"</span>);</code></pre>
+    </div>
+  </div>
+  <div class="code-runner" style="margin-top: 16px;">
+    <div class="code-runner-header">
+      <span>Program.cs</span>
+      <button class="run-btn" onclick="simulateRun(this, 'interpolation-output')">&#9654; Run</button>
+    </div>
+    <pre><code><span class="type">decimal</span> balance = <span class="number">45000.50m</span>;
+<span class="type">Console</span>.<span class="keyword">WriteLine</span>(<span class="string">$"Balance: {balance:N2} GEL"</span>);
+<span class="type">Console</span>.<span class="keyword">WriteLine</span>(<span class="string">$"Date: {DateTime.Now:yyyy-MM-dd}"</span>);
+<span class="type">Console</span>.<span class="keyword">WriteLine</span>(<span class="string">$"Sum: {10 + 20}"</span>);</code></pre>
+    <div class="code-output" id="interpolation-output">Balance: 45,000.50 GEL
+Date: 2026-03-23
+Sum: 30</div>
+  </div>
+</div>
+
+<!-- ============================================= -->
+<!-- SLIDE 12: Variables Preview -->
+<!-- ============================================= -->
+<div class="slide" data-slide="12">
+  <h2>Variables &mdash; Quick Preview</h2>
+  <p style="margin-bottom: 16px;">We'll cover types in depth in Session 2. For now, the essentials:</p>
+  <table>
+    <tr><th>C#</th><th>T-SQL</th><th>Notes</th></tr>
+    <tr><td><code><span class="type">string</span> name = <span class="string">"test"</span>;</code></td><td><code>DECLARE @name NVARCHAR(50) = 'test'</code></td><td>C# strings are always Unicode</td></tr>
+    <tr><td><code><span class="type">int</span> count = <span class="number">5</span>;</code></td><td><code>DECLARE @count INT = 5</code></td><td>Same concept</td></tr>
+    <tr><td><code><span class="type">decimal</span> amt = <span class="number">10.5m</span>;</code></td><td><code>DECLARE @amt DECIMAL(18,2) = 10.5</code></td><td>Use <code>m</code> suffix for decimals</td></tr>
+    <tr><td><code><span class="type">bool</span> flag = <span class="keyword">true</span>;</code></td><td><code>DECLARE @flag BIT = 1</code></td><td><code>true</code>/<code>false</code> not <code>1</code>/<code>0</code></td></tr>
+    <tr><td><code><span class="type">DateTime</span> now = <span class="type">DateTime</span>.Now;</code></td><td><code>DECLARE @now DATETIME = GETDATE()</code></td><td>Same concept</td></tr>
+    <tr><td><code><span class="keyword">var</span> x = <span class="number">42</span>;</code></td><td><em>No equivalent</em></td><td>Compiler infers the type</td></tr>
+  </table>
+</div>
+
+<!-- ============================================= -->
+<!-- SLIDE 13: Complete Example -->
+<!-- ============================================= -->
+<div class="slide" data-slide="13">
+  <h2>Complete Example: Account Viewer</h2>
+  <div class="code-runner">
+    <div class="code-runner-header">
+      <span>Program.cs &mdash; HSP Account Viewer</span>
+      <button class="run-btn" onclick="simulateRun(this, 'full-example')">&#9654; Run</button>
+    </div>
+    <pre><code><span class="type">Console</span>.<span class="keyword">WriteLine</span>(<span class="string">"=== HSP Account Viewer ==="</span>);
+
+<span class="type">string</span> holder = <span class="string">"Giorgi Margvelashvili"</span>;
+<span class="type">int</span> accNum = <span class="number">100234</span>;
+<span class="type">decimal</span> balance = <span class="number">45_000.50m</span>;
+<span class="type">string</span> currency = <span class="string">"GEL"</span>;
+<span class="type">bool</span> isActive = <span class="keyword">true</span>;
+
+<span class="type">Console</span>.<span class="keyword">WriteLine</span>(<span class="string">$"  Holder:  {holder}"</span>);
+<span class="type">Console</span>.<span class="keyword">WriteLine</span>(<span class="string">$"  Account: {accNum}"</span>);
+<span class="type">Console</span>.<span class="keyword">WriteLine</span>(<span class="string">$"  Balance: {balance:N2} {currency}"</span>);
+<span class="type">Console</span>.<span class="keyword">WriteLine</span>(<span class="string">$"  Status:  {(isActive ? "Active" : "Inactive")}"</span>);</code></pre>
+    <div class="code-output" id="full-example">=== HSP Account Viewer ===
+  Holder:  Giorgi Margvelashvili
+  Account: 100234
+  Balance: 45,000.50 GEL
+  Status:  Active</div>
+  </div>
+</div>
+
+<!-- ============================================= -->
+<!-- SLIDE 14: NuGet -->
+<!-- ============================================= -->
+<div class="slide" data-slide="14">
+  <h2>NuGet &mdash; Package Manager</h2>
+  <div class="analogy">NuGet is like an app store for code libraries. Over 400,000 packages available. Need JSON? Logging? Email? There's a package.</div>
+  <div class="code-runner" style="margin-top: 20px;">
+    <div class="code-runner-header">
+      <span>Terminal</span>
+      <button class="run-btn" onclick="simulateRun(this, 'nuget-demo')">&#9654; Simulate</button>
+    </div>
+    <pre><code><span class="comment"># Install a package</span>
+$ dotnet add package Newtonsoft.Json
+
+<span class="comment"># This updates your .csproj:</span>
+&lt;PackageReference Include=<span class="string">"Newtonsoft.Json"</span> Version=<span class="string">"13.0.3"</span> /&gt;</code></pre>
+    <div class="code-output" id="nuget-demo">info : Adding PackageReference for package 'Newtonsoft.Json' into project.
+info : Package 'Newtonsoft.Json' is compatible with all the specified frameworks.
+info : PackageReference for package 'Newtonsoft.Json' version '13.0.3' added.</div>
+  </div>
+  <h3 style="margin-top: 20px;">Packages We'll Use in This Course</h3>
+  <div class="columns" style="font-size: 0.95em;">
+    <div class="column">
+      <ul>
+        <li>EF Core &mdash; database ORM</li>
+        <li>FluentValidation &mdash; input validation</li>
+        <li>Serilog &mdash; structured logging</li>
+        <li>Swashbuckle &mdash; Swagger docs</li>
+        <li>Mapperly &mdash; object mapping</li>
+      </ul>
+    </div>
+    <div class="column">
+      <ul>
+        <li>xUnit &mdash; unit testing</li>
+        <li>Moq &mdash; mocking</li>
+        <li>FluentAssertions &mdash; test assertions</li>
+        <li>RabbitMQ.Client &mdash; messaging</li>
+        <li>Polly &mdash; resilience patterns</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================= -->
+<!-- SLIDE 15: Git Basics -->
+<!-- ============================================= -->
+<div class="slide" data-slide="15">
+  <h2>Git &mdash; Version Control</h2>
+  <p style="margin-bottom: 20px;">Stop saving <code>sp_GetAccount_2026_03_20_backup_v2_final.sql</code>. Use Git.</p>
+  <table>
+    <tr><th>Git Concept</th><th>What It Means</th><th>Analogy</th></tr>
+    <tr><td><strong>Repository</strong></td><td>A folder tracked by Git</td><td>A database with full change history</td></tr>
+    <tr><td><strong>Commit</strong></td><td>A snapshot at a point in time</td><td>A labeled database backup</td></tr>
+    <tr><td><strong>Branch</strong></td><td>A parallel line of development</td><td>A copy of DB for testing changes</td></tr>
+    <tr><td><strong>Merge</strong></td><td>Combining changes from branches</td><td>Deploying test changes to production</td></tr>
+  </table>
+  <div class="code-runner" style="margin-top: 16px;">
+    <div class="code-runner-header">
+      <span>Terminal &mdash; First Git Workflow</span>
+      <button class="run-btn" onclick="simulateRun(this, 'git-demo')">&#9654; Simulate</button>
+    </div>
+    <pre><code>$ git init
+$ dotnet new gitignore
+$ git add .
+$ git commit -m <span class="string">"Initialize HelloBanking project"</span></code></pre>
+    <div class="code-output" id="git-demo">Initialized empty Git repository in /HelloBanking/.git/
+The template "gitignore" was created successfully.
+[main (root-commit) a1b2c3d] Initialize HelloBanking project
+ 3 files changed, 42 insertions(+)</div>
+  </div>
+</div>
+
+<!-- ============================================= -->
+<!-- SLIDE 16: .gitignore -->
+<!-- ============================================= -->
+<div class="slide" data-slide="16">
+  <h2>.gitignore &mdash; What NOT to Track</h2>
+  <div class="columns">
+    <div class="column">
+      <h3 style="color: var(--red);">Never commit these:</h3>
+      <ul>
+        <li><code>bin/</code> &mdash; compiled output</li>
+        <li><code>obj/</code> &mdash; intermediate build files</li>
+        <li><code>.vs/</code> &mdash; Visual Studio settings</li>
+        <li><code>*.user</code> &mdash; personal preferences</li>
+        <li>Passwords and secrets</li>
+      </ul>
+    </div>
+    <div class="column">
+      <h3 style="color: var(--green);">Always commit these:</h3>
+      <ul>
+        <li><code>*.cs</code> &mdash; source code</li>
+        <li><code>*.csproj</code> &mdash; project configuration</li>
+        <li><code>*.sln</code> &mdash; solution file</li>
+        <li><code>.gitignore</code> &mdash; the ignore rules</li>
+        <li><code>appsettings.json</code> &mdash; non-secret config</li>
+      </ul>
+    </div>
+  </div>
+  <div class="highlight-box" style="margin-top: 20px;">
+    <p><strong>Tip:</strong> Run <code>dotnet new gitignore</code> to generate a comprehensive .NET-specific gitignore file automatically.</p>
+  </div>
+</div>
+
+<!-- ============================================= -->
+<!-- SLIDE 17: Quiz -->
+<!-- ============================================= -->
+<div class="slide" data-slide="17">
+  <h2>Knowledge Check</h2>
+  <p style="margin-bottom: 20px;"><strong>Q: What is the C# equivalent of the SQL Server Query Optimizer?</strong></p>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'quiz1')">A) The C# Compiler</div>
+  <div class="quiz-option" onclick="checkQuiz(this, true, 'quiz1')">B) The JIT (Just-In-Time) Compiler</div>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'quiz1')">C) NuGet</div>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'quiz1')">D) Visual Studio</div>
+  <div class="quiz-feedback correct" id="quiz1-correct">Correct! The JIT compiler optimizes IL code into native machine code at runtime, just like the Query Optimizer generates optimal execution plans for T-SQL.</div>
+  <div class="quiz-feedback wrong" id="quiz1-wrong">Not quite. The C# compiler converts C# to IL (like parsing T-SQL). The <strong>JIT compiler</strong> then optimizes IL into machine code at runtime &mdash; that's the equivalent of the Query Optimizer.</div>
+</div>
+
+<!-- ============================================= -->
+<!-- SLIDE 18: Quiz 2 -->
+<!-- ============================================= -->
+<div class="slide" data-slide="18">
+  <h2>Knowledge Check</h2>
+  <p style="margin-bottom: 20px;"><strong>Q: Which command creates a new console project and runs it?</strong></p>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'quiz2')">A) <code>dotnet create console && dotnet execute</code></div>
+  <div class="quiz-option" onclick="checkQuiz(this, true, 'quiz2')">B) <code>dotnet new console -n MyApp && cd MyApp && dotnet run</code></div>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'quiz2')">C) <code>dotnet build console -n MyApp && dotnet start</code></div>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'quiz2')">D) <code>csc MyApp.cs && MyApp.exe</code></div>
+  <div class="quiz-feedback correct" id="quiz2-correct">Correct! <code>dotnet new console -n MyApp</code> creates the project, then <code>dotnet run</code> compiles and executes it in one step.</div>
+  <div class="quiz-feedback wrong" id="quiz2-wrong">Not quite. The correct commands are <code>dotnet new</code> (to create) and <code>dotnet run</code> (to build + execute). Option D would work with the old .NET Framework compiler, but we use the modern <code>dotnet</code> CLI.</div>
+</div>
+
+<!-- ============================================= -->
+<!-- SLIDE 19: HSP Project -->
+<!-- ============================================= -->
+<div class="slide" data-slide="19">
+  <h2>HSP Project &mdash; The Journey Begins</h2>
+  <p style="margin-bottom: 16px;">Your capstone project: extract a real HSP stored procedure into a .NET microservice.</p>
+  <div class="columns">
+    <div class="column">
+      <h3 style="color: var(--orange);">HSP (Today)</h3>
+      <ul>
+        <li>All logic in stored procedures</li>
+        <li>Tightly coupled</li>
+        <li>Hard to unit test</li>
+        <li>Manual deployments</li>
+        <li>Limited monitoring</li>
+      </ul>
+    </div>
+    <div class="column">
+      <h3 style="color: var(--green);">Microservice (Session 20)</h3>
+      <ul>
+        <li>C# services with clear separation</li>
+        <li>Loosely coupled, independent</li>
+        <li>Comprehensive automated tests</li>
+        <li>Automated CI/CD pipeline</li>
+        <li>Structured logging &amp; health checks</li>
+      </ul>
+    </div>
+  </div>
+  <div class="highlight-box green" style="margin-top: 20px;">
+    <p><strong>Dual value:</strong> You learn .NET development AND produce a real microservice that moves the bank toward its target architecture.</p>
+  </div>
+</div>
+
+<!-- ============================================= -->
+<!-- SLIDE 20: Activity -->
+<!-- ============================================= -->
+<div class="slide" data-slide="20">
+  <h2>Activity: Identify Your Candidate</h2>
+  <p style="margin-bottom: 20px;">Choose an HSP stored procedure to extract. Good candidates are:</p>
+  <div class="step">
+    <div class="step-num" style="background: var(--green);">&#10003;</div>
+    <div class="step-content"><p><strong>Clear, bounded responsibility</strong> &mdash; does one thing well</p></div>
+  </div>
+  <div class="step">
+    <div class="step-num" style="background: var(--green);">&#10003;</div>
+    <div class="step-content"><p><strong>Self-contained</strong> &mdash; doesn't call 50 other procedures</p></div>
+  </div>
+  <div class="step">
+    <div class="step-num" style="background: var(--green);">&#10003;</div>
+    <div class="step-content"><p><strong>Well-defined inputs/outputs</strong> &mdash; you know exactly what goes in and comes out</p></div>
+  </div>
+  <div class="step">
+    <div class="step-num" style="background: var(--green);">&#10003;</div>
+    <div class="step-content"><p><strong>Represents a business capability</strong> &mdash; could stand on its own as a service</p></div>
+  </div>
+  <div class="highlight-box orange" style="margin-top: 20px;">
+    <p><strong>Document your choice:</strong> procedure name, input parameters, output structure, business rules, error handling, dependent tables, calling applications.</p>
+  </div>
+</div>
+
+<!-- ============================================= -->
+<!-- SLIDE 21: Homework -->
+<!-- ============================================= -->
+<div class="slide" data-slide="21">
+  <h2>Before Session 2</h2>
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-content">
+      <p><strong>Install the tools</strong> (if not done): Visual Studio 2022/2026, .NET 10 SDK, Git for Windows</p>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-content">
+      <p><strong>Create your first project and commit to Git:</strong></p>
+      <pre style="margin-top: 8px;"><code>dotnet new console -n HSP.MyServiceName
+cd HSP.MyServiceName
+dotnet new gitignore
+git init && git add . && git commit -m <span class="string">"Initialize project"</span></code></pre>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-content">
+      <p><strong>Complete the procedure specification</strong> for your chosen HSP stored procedure</p>
+    </div>
+  </div>
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-content">
+      <p><strong>Read:</strong> <em>C# 12 in a Nutshell</em> &mdash; Chapter 1 (~20 pages)</p>
+    </div>
+  </div>
+  <div class="highlight-box" style="margin-top: 20px;">
+    <p><strong>Session 2 Preview:</strong> Types, Variables, and Expressions &mdash; mapping every SQL data type to C#. This is where your SQL knowledge becomes a superpower.</p>
+  </div>
+</div>
+
+<!-- ============================================= -->
+<!-- SLIDE 22: Summary -->
+<!-- ============================================= -->
+<div class="slide" data-slide="22">
+  <h2>Session 1 Summary</h2>
+  <table>
+    <tr><th>Concept</th><th>Key Takeaway</th></tr>
+    <tr><td>.NET Runtime</td><td>CLR is to C# what SQL Server Engine is to T-SQL</td></tr>
+    <tr><td>Compilation</td><td>C# &rarr; IL &rarr; JIT &rarr; Machine Code (like T-SQL &rarr; Exec Plan)</td></tr>
+    <tr><td>.NET 10</td><td>LTS version with C# 14 &mdash; stable for banking</td></tr>
+    <tr><td>Project Structure</td><td>Solution = Database, Project = Schema, Class = Table</td></tr>
+    <tr><td><code>dotnet</code> CLI</td><td><code>new</code>, <code>build</code>, <code>run</code> &mdash; your primary tool</td></tr>
+    <tr><td>Program.cs</td><td>Top-level statements &mdash; simple entry point</td></tr>
+    <tr><td>String Interpolation</td><td><code>$"Hello {name}"</code> &mdash; replaces CAST + concatenation</td></tr>
+    <tr><td>NuGet</td><td>Package manager &mdash; 400K+ libraries available</td></tr>
+    <tr><td>Git</td><td>Version control &mdash; <code>init</code>, <code>add</code>, <code>commit</code></td></tr>
+    <tr><td>HSP Project</td><td>Extract a real stored procedure into a microservice</td></tr>
+  </table>
+</div>
+
+</div><!-- /slide-container -->
+
+<!-- Navigation -->
+<div class="nav">
+  <button id="prevBtn" onclick="navigate(-1)" disabled>&#8592;</button>
+  <span class="slide-counter" id="slideCounter">1 / 22</span>
+  <button id="nextBtn" onclick="navigate(1)">&#8594;</button>
+</div>
+
+<div class="keyboard-hints">
+  <kbd>&#8592;</kbd> <kbd>&#8594;</kbd> Navigate &nbsp;&bull;&nbsp; <kbd>Space</kbd> Next &nbsp;&bull;&nbsp; <kbd>R</kbd> Reveal items
+</div>
+
+<script>
+  let currentSlide = 1;
+  const totalSlides = document.querySelectorAll('.slide').length;
+
+  function showSlide(n) {
+    document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+    const target = document.querySelector(`[data-slide="${n}"]`);
+    if (target) {
+      target.classList.add('active');
+      currentSlide = n;
+      updateUI();
+      revealItems();
+    }
+  }
+
+  function navigate(dir) {
+    const next = currentSlide + dir;
+    if (next >= 1 && next <= totalSlides) showSlide(next);
+  }
+
+  function updateUI() {
+    document.getElementById('slideCounter').textContent = `${currentSlide} / ${totalSlides}`;
+    document.getElementById('prevBtn').disabled = currentSlide === 1;
+    document.getElementById('nextBtn').disabled = currentSlide === totalSlides;
+    document.getElementById('progressBar').style.width = `${(currentSlide / totalSlides) * 100}%`;
+  }
+
+  function revealItems() {
+    const slide = document.querySelector('.slide.active');
+    const items = slide.querySelectorAll('.reveal-item:not(.visible)');
+    items.forEach((item, i) => {
+      setTimeout(() => item.classList.add('visible'), 200 * (i + 1));
+    });
+  }
+
+  function simulateRun(btn, outputId) {
+    btn.textContent = '⏳ Running...';
+    btn.disabled = true;
+    setTimeout(() => {
+      document.getElementById(outputId).classList.add('show');
+      btn.textContent = '✓ Done';
+      setTimeout(() => {
+        btn.textContent = '▶ Run';
+        btn.disabled = false;
+      }, 2000);
+    }, 800);
+  }
+
+  function checkQuiz(el, correct, quizId) {
+    // Reset all options in this quiz
+    const slide = el.closest('.slide');
+    slide.querySelectorAll('.quiz-option').forEach(o => {
+      o.classList.remove('correct', 'wrong');
+      o.style.pointerEvents = 'none';
+    });
+    slide.querySelectorAll('.quiz-feedback').forEach(f => f.classList.remove('show'));
+
+    if (correct) {
+      el.classList.add('correct');
+      document.getElementById(quizId + '-correct').classList.add('show');
+    } else {
+      el.classList.add('wrong');
+      document.getElementById(quizId + '-wrong').classList.add('show');
+    }
+
+    // Re-enable after 3 seconds
+    setTimeout(() => {
+      slide.querySelectorAll('.quiz-option').forEach(o => o.style.pointerEvents = 'auto');
+    }, 3000);
+  }
+
+  // Keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); navigate(1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); navigate(-1); }
+    if (e.key === 'r' || e.key === 'R') revealItems();
+    if (e.key === 'Home') showSlide(1);
+    if (e.key === 'End') showSlide(totalSlides);
+  });
+
+  // Touch support
+  let touchStartX = 0;
+  document.addEventListener('touchstart', (e) => touchStartX = e.touches[0].clientX);
+  document.addEventListener('touchend', (e) => {
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) navigate(diff > 0 ? 1 : -1);
+  });
+
+  // Initialize
+  updateUI();
+  revealItems();
+</script>
+</body>
+</html>
