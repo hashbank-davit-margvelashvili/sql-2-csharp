@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Session 3: Control Flow and Methods</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface2: #334155;
+    --accent: #3b82f6;
+    --accent2: #8b5cf6;
+    --text: #e2e8f0;
+    --text-dim: #94a3b8;
+    --green: #22c55e;
+    --orange: #f59e0b;
+    --red: #ef4444;
+    --cyan: #06b6d4;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg); color: var(--text); overflow: hidden; height: 100vh;
+  }
+  .progress-bar {
+    position: fixed; top: 0; left: 0; height: 4px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.4s ease; z-index: 100;
+  }
+  .slide-container {
+    width: 100vw; height: 100vh; display: flex;
+    align-items: center; justify-content: center; padding: 40px 80px;
+  }
+  .slide { display: none; width: 100%; max-width: 1100px; animation: fadeIn 0.4s ease; }
+  .slide.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+  h1 {
+    font-size: 2.8em; font-weight: 700; margin-bottom: 12px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  h2 { font-size: 2.2em; font-weight: 600; margin-bottom: 30px; }
+  h3 { font-size: 1.3em; font-weight: 600; margin-bottom: 16px; color: var(--accent); }
+  .subtitle { font-size: 1.3em; color: var(--text-dim); margin-bottom: 40px; }
+  p, li { font-size: 1.15em; line-height: 1.7; }
+  ul { list-style: none; padding: 0; }
+  ul li { padding: 8px 0 8px 28px; position: relative; }
+  ul li::before { content:'▸'; position:absolute; left:0; color:var(--accent); font-weight:bold; }
+  pre {
+    background: var(--surface); border: 1px solid var(--surface2); border-radius: 12px;
+    padding: 20px 24px; overflow-x: auto; margin: 16px 0; font-size: 0.95em;
+  }
+  code { font-family: 'Cascadia Code','Fira Code','Consolas', monospace; font-size: 0.95em; }
+  pre code { color: var(--text); }
+  .kw { color: var(--accent); } .str { color: var(--green); } .cm { color: var(--text-dim); font-style: italic; }
+  .tp { color: var(--cyan); } .nm { color: var(--orange); } .num { color: #fb923c; }
+  :not(pre) > code { background: var(--surface); padding: 3px 8px; border-radius: 6px; color: var(--cyan); }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 1.05em; }
+  th { background: var(--surface2); padding: 12px 16px; text-align: left; font-weight: 600; color: var(--accent); border-bottom: 2px solid var(--accent); }
+  td { padding: 10px 16px; border-bottom: 1px solid var(--surface2); }
+  tr:hover td { background: var(--surface); }
+  .columns { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
+  .columns3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; align-items: start; }
+  .highlight-box {
+    background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(139,92,246,0.1));
+    border: 1px solid rgba(59,130,246,0.3); border-radius: 12px; padding: 20px 24px; margin: 16px 0;
+  }
+  .highlight-box.green { background: linear-gradient(135deg, rgba(34,197,94,0.1), rgba(6,182,212,0.1)); border-color: rgba(34,197,94,0.3); }
+  .highlight-box.orange { background: linear-gradient(135deg, rgba(245,158,11,0.1), rgba(239,68,68,0.1)); border-color: rgba(245,158,11,0.3); }
+  .highlight-box.red { background: linear-gradient(135deg, rgba(239,68,68,0.1), rgba(245,158,11,0.1)); border-color: rgba(239,68,68,0.3); }
+  .analogy {
+    background: var(--surface); border-left: 4px solid var(--orange);
+    border-radius: 0 12px 12px 0; padding: 16px 20px; margin: 16px 0; font-size: 1.05em;
+  }
+  .analogy::before { content: '🔗 SQL Analogy: '; color: var(--orange); font-weight: 600; }
+  .quiz-option {
+    background: var(--surface); border: 2px solid var(--surface2); border-radius: 10px;
+    padding: 14px 20px; margin: 8px 0; cursor: pointer; transition: all 0.2s; font-size: 1.05em;
+  }
+  .quiz-option:hover { border-color: var(--accent); background: var(--surface2); }
+  .quiz-option.correct { border-color: var(--green); background: rgba(34,197,94,0.15); }
+  .quiz-option.wrong { border-color: var(--red); background: rgba(239,68,68,0.1); }
+  .quiz-feedback { margin-top: 12px; padding: 12px 16px; border-radius: 8px; display: none; font-size: 1.05em; }
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.correct { background: rgba(34,197,94,0.15); color: var(--green); }
+  .quiz-feedback.wrong { background: rgba(239,68,68,0.1); color: var(--red); }
+  .code-runner { background: var(--surface); border: 1px solid var(--surface2); border-radius: 12px; overflow: hidden; margin: 16px 0; }
+  .code-runner-header { background: var(--surface2); padding: 8px 16px; display: flex; justify-content: space-between; align-items: center; font-size: 0.9em; color: var(--text-dim); }
+  .run-btn { background: var(--green); color: white; border: none; padding: 6px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: all 0.2s; }
+  .run-btn:hover { opacity: 0.85; transform: scale(1.02); }
+  .code-output { border-top: 1px solid var(--surface2); padding: 12px 16px; font-family: 'Cascadia Code', monospace; font-size: 0.9em; color: var(--green); display: none; white-space: pre-wrap; }
+  .code-output.show { display: block; }
+  .tag {
+    display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.85em;
+    font-weight: 600; margin: 2px;
+  }
+  .tag-blue { background: rgba(59,130,246,0.2); color: var(--accent); border: 1px solid rgba(59,130,246,0.4); }
+  .tag-green { background: rgba(34,197,94,0.2); color: var(--green); border: 1px solid rgba(34,197,94,0.4); }
+  .tag-orange { background: rgba(245,158,11,0.2); color: var(--orange); border: 1px solid rgba(245,158,11,0.4); }
+  .big-center { text-align: center; margin: 30px 0; }
+  .huge { font-size: 3em; font-weight: 700; color: var(--accent); }
+  .nav {
+    position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 16px; align-items: center; z-index: 50;
+    background: rgba(30,41,59,0.95); border: 1px solid var(--surface2);
+    padding: 12px 24px; border-radius: 50px; backdrop-filter: blur(8px);
+  }
+  .nav button {
+    background: var(--accent); color: white; border: none; padding: 10px 24px;
+    border-radius: 24px; font-size: 0.95em; font-weight: 600; cursor: pointer; transition: all 0.2s;
+  }
+  .nav button:hover { opacity: 0.85; transform: scale(1.04); }
+  .nav button:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+  .slide-counter { color: var(--text-dim); font-size: 0.9em; min-width: 70px; text-align: center; }
+  .kbd { background: var(--surface2); border: 1px solid var(--text-dim); border-radius: 6px; padding: 2px 8px; font-family: monospace; font-size: 0.9em; }
+  .badge { display: inline-block; background: var(--accent2); color: white; border-radius: 6px; padding: 2px 10px; font-size: 0.85em; font-weight: 600; margin-left: 8px; }
+  .timeline { display: flex; gap: 0; margin: 20px 0; }
+  .timeline-item { flex: 1; text-align: center; position: relative; padding-top: 50px; }
+  .timeline-item::before { content:''; position: absolute; top: 20px; left: 0; right: 0; height: 3px; background: var(--surface2); }
+  .timeline-item:first-child::before { left: 50%; }
+  .timeline-item:last-child::before { right: 50%; }
+  .timeline-dot { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 22px; height: 22px; border-radius: 50%; background: var(--accent); border: 3px solid var(--bg); z-index: 1; }
+  .timeline-label { font-size: 0.9em; color: var(--text-dim); margin-top: 6px; }
+  .session-header { color: var(--text-dim); font-size: 1em; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- SLIDE 1: Title -->
+<div class="slide-container">
+<div class="slide active" id="slide-1">
+  <div class="session-header">Session 3 · Block A: Foundations of C#</div>
+  <h1>Control Flow &amp; Methods</h1>
+  <p class="subtitle">From T-SQL procedures to C# methods that actually return values</p>
+  <div class="columns" style="margin-top:48px">
+    <div>
+      <h3>What You'll Learn</h3>
+      <ul>
+        <li><code>if / else if / else</code> — same logic, new syntax</li>
+        <li><code>switch</code> expressions — beyond CASE WHEN</li>
+        <li>Four loop types and when to use each</li>
+        <li>Methods: parameters, return types, overloading</li>
+        <li><code>out</code> &amp; <code>ref</code> — the OUTPUT parameter equivalent</li>
+      </ul>
+    </div>
+    <div>
+      <h3>The Exercise</h3>
+      <div class="highlight-box orange">
+        <p>Rewrite a T-SQL fee calculation stored procedure as C# methods.</p>
+        <br>
+        <p style="color:var(--text-dim)">Same business logic. No SQL. Returns values instead of OUTPUT parameters.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 2: IF/ELSE -->
+<div class="slide" id="slide-2">
+  <h2>if / else — You Already Know This</h2>
+  <div class="columns">
+    <div>
+      <h3>T-SQL</h3>
+      <pre><code><span class="kw">IF</span> <span class="nm">@amount</span> > <span class="num">1000</span>
+<span class="kw">BEGIN</span>
+    <span class="kw">SET</span> <span class="nm">@fee</span> = <span class="nm">@amount</span> * <span class="num">0.01</span>;
+<span class="kw">END</span>
+<span class="kw">ELSE IF</span> <span class="nm">@amount</span> > <span class="num">100</span>
+<span class="kw">BEGIN</span>
+    <span class="kw">SET</span> <span class="nm">@fee</span> = <span class="nm">@amount</span> * <span class="num">0.02</span>;
+<span class="kw">END</span>
+<span class="kw">ELSE</span>
+<span class="kw">BEGIN</span>
+    <span class="kw">SET</span> <span class="nm">@fee</span> = <span class="num">5.00</span>;
+<span class="kw">END</span></code></pre>
+    </div>
+    <div>
+      <h3>C#</h3>
+      <pre><code><span class="kw">if</span> (amount > <span class="num">1000</span>)
+{
+    fee = amount * <span class="num">0.01m</span>;
+}
+<span class="kw">else if</span> (amount > <span class="num">100</span>)
+{
+    fee = amount * <span class="num">0.02m</span>;
+}
+<span class="kw">else</span>
+{
+    fee = <span class="num">5.00m</span>;
+}</code></pre>
+    </div>
+  </div>
+  <div class="analogy">BEGIN...END becomes { } (curly braces). Condition must be in parentheses ( ).</div>
+</div>
+
+<!-- SLIDE 3: Ternary + Null Coalescing -->
+<div class="slide" id="slide-3">
+  <h2>Ternary &amp; Null-Coalescing</h2>
+  <h3>IIF() → Ternary Operator <code>? :</code></h3>
+  <div class="columns">
+    <div>
+      <pre><code><span class="cm">-- T-SQL</span>
+<span class="kw">SET</span> <span class="nm">@status</span> = <span class="kw">IIF</span>(<span class="nm">@balance</span> >= <span class="num">0</span>,
+                    <span class="str">'Active'</span>,
+                    <span class="str">'Overdrawn'</span>);</code></pre>
+    </div>
+    <div>
+      <pre><code><span class="cm">// C#</span>
+<span class="tp">string</span> status = balance >= <span class="num">0</span>
+    ? <span class="str">"Active"</span>
+    : <span class="str">"Overdrawn"</span>;</code></pre>
+    </div>
+  </div>
+  <h3 style="margin-top:24px">ISNULL/COALESCE → <code>??</code></h3>
+  <div class="columns">
+    <div>
+      <pre><code><span class="cm">-- T-SQL</span>
+<span class="kw">SET</span> <span class="nm">@name</span> = <span class="kw">COALESCE</span>(<span class="nm">@first</span>,
+                      <span class="nm">@last</span>,
+                      <span class="str">'Unknown'</span>);
+<span class="kw">SET</span> <span class="nm">@fee</span> = <span class="nm">@fee</span> - <span class="kw">ISNULL</span>(<span class="nm">@disc</span>, <span class="num">0</span>);</code></pre>
+    </div>
+    <div>
+      <pre><code><span class="cm">// C#</span>
+<span class="tp">string</span> name = first ?? last ?? <span class="str">"Unknown"</span>;
+
+<span class="tp">decimal</span> fee = fee - (discount ?? <span class="num">0m</span>);
+
+<span class="cm">// ??= assigns only if null</span>
+discount ??= <span class="num">0m</span>;</code></pre>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 4: switch expression -->
+<div class="slide" id="slide-4">
+  <h2>switch Expression — Beyond CASE WHEN</h2>
+  <h3>T-SQL CASE WHEN</h3>
+  <pre><code><span class="kw">SET</span> <span class="nm">@desc</span> = <span class="kw">CASE</span> <span class="nm">@type</span>
+    <span class="kw">WHEN</span> <span class="str">'DEP'</span> <span class="kw">THEN</span> <span class="str">'Deposit'</span>
+    <span class="kw">WHEN</span> <span class="str">'WIT'</span> <span class="kw">THEN</span> <span class="str">'Withdrawal'</span>
+    <span class="kw">ELSE</span> <span class="str">'Unknown'</span>
+<span class="kw">END</span>;</code></pre>
+  <h3 style="margin-top:20px">C# switch expression <span class="badge">Modern</span></h3>
+  <pre><code><span class="tp">string</span> desc = type <span class="kw">switch</span>
+{
+    <span class="str">"DEP"</span> => <span class="str">"Deposit"</span>,
+    <span class="str">"WIT"</span> => <span class="str">"Withdrawal"</span>,
+    <span class="str">"TRF"</span> => <span class="str">"Transfer"</span>,
+    _     => <span class="str">"Unknown"</span>     <span class="cm">// _ = default case</span>
+};</code></pre>
+  <div class="highlight-box green" style="margin-top:16px">
+    <p><strong>It's an expression</strong> — it has a value, so you can assign it, return it, or use it inline. No <code>break</code> needed. The <code>_</code> wildcard is the default.</p>
+  </div>
+</div>
+
+<!-- SLIDE 5: Pattern matching -->
+<div class="slide" id="slide-5">
+  <h2>Pattern Matching — SQL Has No Equivalent</h2>
+  <p>C# switch expressions go beyond simple value matching:</p>
+  <pre><code><span class="cm">// Match on value ranges</span>
+<span class="tp">string</span> risk = balance <span class="kw">switch</span>
+{
+    < <span class="num">0</span>                        => <span class="str">"Negative"</span>,
+    >= <span class="num">0</span> <span class="kw">and</span> < <span class="num">1_000</span>         => <span class="str">"Low"</span>,
+    >= <span class="num">1_000</span> <span class="kw">and</span> < <span class="num">50_000</span>   => <span class="str">"Medium"</span>,
+    >= <span class="num">50_000</span>                => <span class="str">"High"</span>
+};
+
+<span class="cm">// Match on type (we'll use this more in Sessions 4-5)</span>
+<span class="tp">string</span> info = transaction <span class="kw">switch</span>
+{
+    <span class="tp">DepositTransaction</span> d    => <span class="nm">$</span><span class="str">"Deposit of {d.Amount:C}"</span>,
+    <span class="tp">WithdrawalTransaction</span> w => <span class="nm">$</span><span class="str">"Withdrawal of {w.Amount:C}"</span>,
+    <span class="kw">null</span>                     => <span class="str">"No transaction"</span>,
+    _                        => <span class="str">"Unknown"</span>
+};</code></pre>
+  <div class="analogy">This is like a CASE expression that can also check ranges, types, and conditions simultaneously.</div>
+</div>
+
+<!-- SLIDE 6: Quiz - control flow -->
+<div class="slide" id="slide-6">
+  <h2>Quick Check</h2>
+  <p style="font-size:1.2em; margin-bottom:24px">What is the C# equivalent of SQL's <code>ISNULL(@discount, 0)</code>?</p>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'q1')">A. <code>discount.HasValue ? discount : 0m</code></div>
+  <div class="quiz-option" onclick="checkQuiz(this, true, 'q1')">B. <code>discount ?? 0m</code></div>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'q1')">C. <code>discount == null ? 0m : discount</code></div>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'q1')">D. <code>NullCoalesce(discount, 0m)</code></div>
+  <div class="quiz-feedback" id="q1-feedback-correct" class="correct">
+    ✓ Correct! <code>??</code> is the null-coalescing operator — returns the left side if not null, otherwise the right side. Option C would also work, but <code>??</code> is idiomatic C#.
+  </div>
+  <div class="quiz-feedback" id="q1-feedback-wrong" class="wrong">
+    ✗ Not quite. The null-coalescing operator <code>??</code> is the direct C# equivalent of <code>ISNULL(x, default)</code>.
+  </div>
+</div>
+
+<!-- SLIDE 7: Loops overview -->
+<div class="slide" id="slide-7">
+  <h2>Loops — T-SQL Has One. C# Has Four.</h2>
+  <table>
+    <tr><th>Loop</th><th>When to Use</th><th>SQL Analogy</th></tr>
+    <tr><td><code>while</code></td><td>Unknown number of iterations</td><td>WHILE</td></tr>
+    <tr><td><code>for</code></td><td>Known count (0 to N)</td><td>WHILE with counter variable</td></tr>
+    <tr><td><code>foreach</code></td><td>Iterate over a collection</td><td>Cursor (but safe and automatic)</td></tr>
+    <tr><td><code>do-while</code></td><td>Execute at least once</td><td>WHILE 1=1 with BREAK inside</td></tr>
+  </table>
+  <div class="highlight-box" style="margin-top:20px">
+    <p><strong>Golden Rule:</strong> Prefer <code>foreach</code> for collections. Use <code>for</code> when you need the index. Use <code>while</code> for condition-based loops.</p>
+  </div>
+</div>
+
+<!-- SLIDE 8: while -->
+<div class="slide" id="slide-8">
+  <h2>while — Direct WHILE Translation</h2>
+  <div class="columns">
+    <div>
+      <h3>T-SQL</h3>
+      <pre><code><span class="kw">DECLARE</span> <span class="nm">@i</span> <span class="tp">INT</span> = <span class="num">1</span>;
+<span class="kw">WHILE</span> <span class="nm">@i</span> <= <span class="num">10</span>
+<span class="kw">BEGIN</span>
+    <span class="kw">PRINT</span> <span class="nm">@i</span>;
+    <span class="kw">SET</span> <span class="nm">@i</span> = <span class="nm">@i</span> + <span class="num">1</span>;
+<span class="kw">END</span></code></pre>
+    </div>
+    <div>
+      <h3>C#</h3>
+      <pre><code><span class="tp">int</span> i = <span class="num">1</span>;
+<span class="kw">while</span> (i <= <span class="num">10</span>)
+{
+    Console.WriteLine(i);
+    i++;   <span class="cm">// same as i = i + 1</span>
+}</code></pre>
+    </div>
+  </div>
+  <h3 style="margin-top:24px">Increment Shortcuts</h3>
+  <div class="columns">
+    <div>
+      <pre><code>i++;    <span class="cm">// i = i + 1</span>
+i--;    <span class="cm">// i = i - 1</span>
+i += <span class="num">5</span>; <span class="cm">// i = i + 5</span></code></pre>
+    </div>
+    <div>
+      <pre><code>i -= <span class="num">3</span>; <span class="cm">// i = i - 3</span>
+i *= <span class="num">2</span>; <span class="cm">// i = i * 2</span>
+i /= <span class="num">4</span>; <span class="cm">// i = i / 4</span></code></pre>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 9: for -->
+<div class="slide" id="slide-9">
+  <h2>for — When You Know the Count</h2>
+  <pre><code><span class="cm">// for (initializer; condition; increment)</span>
+<span class="kw">for</span> (<span class="tp">int</span> i = <span class="num">0</span>; i < <span class="num">10</span>; i++)
+{
+    Console.WriteLine(i);  <span class="cm">// prints 0 through 9</span>
+}</code></pre>
+  <div style="margin: 20px 0;">
+    <div class="columns3">
+      <div class="highlight-box" style="margin:0; text-align:center">
+        <h3>① Initializer</h3>
+        <code>int i = 0</code>
+        <p style="color:var(--text-dim); font-size:0.9em; margin-top:8px">Runs once before loop starts</p>
+      </div>
+      <div class="highlight-box" style="margin:0; text-align:center">
+        <h3>② Condition</h3>
+        <code>i &lt; 10</code>
+        <p style="color:var(--text-dim); font-size:0.9em; margin-top:8px">Checked before each iteration</p>
+      </div>
+      <div class="highlight-box" style="margin:0; text-align:center">
+        <h3>③ Increment</h3>
+        <code>i++</code>
+        <p style="color:var(--text-dim); font-size:0.9em; margin-top:8px">Runs after each iteration</p>
+      </div>
+    </div>
+  </div>
+  <pre><code><span class="cm">// Practical: generate 12 monthly statements</span>
+<span class="kw">for</span> (<span class="tp">int</span> month = <span class="num">1</span>; month <= <span class="num">12</span>; month++)
+{
+    Console.WriteLine(<span class="nm">$</span><span class="str">"Generating statement for month {month}"</span>);
+}</code></pre>
+</div>
+
+<!-- SLIDE 10: foreach -->
+<div class="slide" id="slide-10">
+  <h2>foreach — Your Cursor Replacement</h2>
+  <div class="columns">
+    <div>
+      <h3>T-SQL Cursor (12 lines)</h3>
+      <pre style="font-size:0.82em"><code><span class="kw">DECLARE</span> <span class="nm">@Id</span> <span class="tp">INT</span>;
+<span class="kw">DECLARE</span> cur <span class="kw">CURSOR FOR</span>
+    <span class="kw">SELECT</span> AccountId <span class="kw">FROM</span> Accounts;
+<span class="kw">OPEN</span> cur;
+<span class="kw">FETCH NEXT FROM</span> cur <span class="kw">INTO</span> <span class="nm">@Id</span>;
+<span class="kw">WHILE</span> @@FETCH_STATUS = <span class="num">0</span>
+<span class="kw">BEGIN</span>
+    <span class="cm">-- process @Id</span>
+    <span class="kw">FETCH NEXT FROM</span> cur <span class="kw">INTO</span> <span class="nm">@Id</span>;
+<span class="kw">END</span>;
+<span class="kw">CLOSE</span> cur;
+<span class="kw">DEALLOCATE</span> cur;</code></pre>
+    </div>
+    <div>
+      <h3>C# foreach (1 line)</h3>
+      <pre><code><span class="kw">foreach</span> (<span class="tp">int</span> id <span class="kw">in</span> accountIds)
+{
+    <span class="cm">// process id</span>
+}</code></pre>
+      <div class="highlight-box green" style="margin-top:16px">
+        <p><code>foreach</code> automatically opens, fetches, checks, and closes the collection iterator. No manual cleanup needed.</p>
+      </div>
+      <pre style="margin-top:12px"><code><span class="cm">// With complex objects</span>
+<span class="kw">foreach</span> (<span class="kw">var</span> tx <span class="kw">in</span> transactions)
+{
+    Console.WriteLine(tx.Amount);
+}</code></pre>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 11: break and continue -->
+<div class="slide" id="slide-11">
+  <h2>break and continue</h2>
+  <div class="columns">
+    <div>
+      <h3>break — Exit the Loop</h3>
+      <pre><code><span class="kw">foreach</span> (<span class="kw">var</span> tx <span class="kw">in</span> transactions)
+{
+    <span class="kw">if</span> (tx.Amount > <span class="num">100_000m</span>)
+    {
+        Console.WriteLine(
+            <span class="str">"Large transaction found."</span>);
+        <span class="kw">break</span>;  <span class="cm">// exits the loop</span>
+    }
+}</code></pre>
+    </div>
+    <div>
+      <h3>continue — Skip This Iteration</h3>
+      <pre><code><span class="kw">foreach</span> (<span class="kw">var</span> tx <span class="kw">in</span> transactions)
+{
+    <span class="kw">if</span> (tx.Status == <span class="str">"Cancelled"</span>)
+        <span class="kw">continue</span>; <span class="cm">// skip, go to next</span>
+
+    ProcessTransaction(tx);
+}</code></pre>
+    </div>
+  </div>
+  <div class="analogy">No direct T-SQL equivalent in WHILE loops — you'd use GOTO to a label at the end of the block, which is why cursor-based code is messy.</div>
+</div>
+
+<!-- SLIDE 12: Quiz - loops -->
+<div class="slide" id="slide-12">
+  <h2>Quick Check</h2>
+  <p style="font-size:1.2em; margin-bottom:24px">You need to iterate over a <code>List&lt;Transaction&gt;</code> and process each item. Which loop should you use?</p>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'q2')">A. <code>while</code> with a counter variable</div>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'q2')">B. <code>for</code> loop</div>
+  <div class="quiz-option" onclick="checkQuiz(this, true, 'q2')">C. <code>foreach</code> loop</div>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'q2')">D. <code>do-while</code> loop</div>
+  <div class="quiz-feedback" id="q2-feedback-correct" class="correct">
+    ✓ Correct! <code>foreach</code> is the natural choice for iterating over collections. It handles all the bookkeeping automatically — exactly like replacing a cursor with set-based SQL.
+  </div>
+  <div class="quiz-feedback" id="q2-feedback-wrong" class="wrong">
+    ✗ <code>foreach</code> is the right answer. When you have a collection and want to process each element, <code>foreach</code> is cleaner, safer, and idiomatic C#.
+  </div>
+</div>
+
+<!-- SLIDE 13: Methods intro -->
+<div class="slide" id="slide-13">
+  <h2>Methods — Stored Procedures That Return Values</h2>
+  <table>
+    <tr><th>T-SQL Stored Procedure</th><th>C# Method</th></tr>
+    <tr><td>Named block of code</td><td>Named block of code ✓</td></tr>
+    <tr><td>Has input parameters</td><td>Has parameters ✓</td></tr>
+    <tr><td>OUTPUT parameters</td><td>Return type / <code>out</code> parameters</td></tr>
+    <tr><td>Cannot return a value directly</td><td>Returns any type directly ✓</td></tr>
+    <tr><td>Same name = error</td><td>Overloading: same name OK ✓</td></tr>
+    <tr><td>One result set max</td><td>Returns complex objects, tuples, lists ✓</td></tr>
+  </table>
+  <div class="analogy">A method is like a stored procedure that can directly hand you a value — no OUTPUT parameter, no SELECT result set, just: call it, get a value back.</div>
+</div>
+
+<!-- SLIDE 14: Method anatomy -->
+<div class="slide" id="slide-14">
+  <h2>Anatomy of a Method</h2>
+  <pre><code><span class="cm">// access modifier  return type   name          parameters</span>
+   <span class="kw">public</span>           <span class="tp">decimal</span>       CalculateFee  (<span class="tp">decimal</span> amount, <span class="tp">string</span> type)
+{
+    <span class="tp">decimal</span> fee = amount * <span class="num">0.01m</span>;
+    <span class="kw">return</span> fee;    <span class="cm">// hands the value back to the caller</span>
+}</code></pre>
+  <div style="margin-top:24px">
+    <div class="columns">
+      <div>
+        <h3>Return Types</h3>
+        <pre><code><span class="kw">public void</span> Log(<span class="tp">int</span> id)  { }   <span class="cm">// nothing</span>
+<span class="kw">public</span> <span class="tp">decimal</span> Calc()   { }   <span class="cm">// decimal</span>
+<span class="kw">public bool</span> IsValid()  { }   <span class="cm">// true/false</span></code></pre>
+      </div>
+      <div>
+        <h3>Access Modifiers</h3>
+        <pre><code><span class="kw">public</span>    <span class="cm">// callable from anywhere</span>
+<span class="kw">private</span>   <span class="cm">// only within this class</span>
+<span class="kw">protected</span> <span class="cm">// class + subclasses</span>
+<span class="kw">internal</span>  <span class="cm">// within this project</span></code></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 15: Parameters -->
+<div class="slide" id="slide-15">
+  <h2>Parameters — Required and Optional</h2>
+  <h3>Required Parameters</h3>
+  <div class="columns">
+    <div>
+      <pre><code><span class="cm">-- T-SQL (must pass both)</span>
+<span class="kw">CREATE PROCEDURE</span> CalcFee
+    <span class="nm">@amount</span> <span class="tp">DECIMAL</span>(<span class="num">18</span>,<span class="num">2</span>),
+    <span class="nm">@type</span>   <span class="tp">VARCHAR</span>(<span class="num">10</span>)
+<span class="kw">AS</span> ...</code></pre>
+    </div>
+    <div>
+      <pre><code><span class="cm">// C# (must pass both)</span>
+<span class="kw">public</span> <span class="tp">decimal</span> CalcFee(
+    <span class="tp">decimal</span> amount,
+    <span class="tp">string</span> type)
+{ ... }</code></pre>
+    </div>
+  </div>
+  <h3 style="margin-top:20px">Optional Parameters (Default Values)</h3>
+  <div class="columns">
+    <div>
+      <pre><code><span class="cm">-- T-SQL default value</span>
+<span class="kw">CREATE PROCEDURE</span> CalcFee
+    <span class="nm">@amount</span> <span class="tp">DECIMAL</span>(<span class="num">18</span>,<span class="num">2</span>),
+    <span class="nm">@type</span>   <span class="tp">VARCHAR</span>(<span class="num">10</span>) = <span class="str">'DEP'</span>
+<span class="kw">AS</span> ...</code></pre>
+    </div>
+    <div>
+      <pre><code><span class="cm">// C# default value</span>
+<span class="kw">public</span> <span class="tp">decimal</span> CalcFee(
+    <span class="tp">decimal</span> amount,
+    <span class="tp">string</span> type = <span class="str">"DEP"</span>)
+{ ... }
+
+CalcFee(<span class="num">100m</span>);           <span class="cm">// type = "DEP"</span>
+CalcFee(<span class="num">100m</span>, <span class="str">"WIT"</span>);    <span class="cm">// explicit</span></code></pre>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 16: out parameters -->
+<div class="slide" id="slide-16">
+  <h2><code>out</code> — The OUTPUT Parameter</h2>
+  <div class="columns">
+    <div>
+      <h3>T-SQL OUTPUT</h3>
+      <pre><code><span class="kw">CREATE PROCEDURE</span> ProcessPayment
+    <span class="nm">@amount</span>  <span class="tp">DECIMAL</span>,
+    <span class="nm">@txId</span>    <span class="tp">INT</span> <span class="kw">OUTPUT</span>,
+    <span class="nm">@fee</span>     <span class="tp">DECIMAL</span> <span class="kw">OUTPUT</span>
+<span class="kw">AS</span>
+<span class="kw">BEGIN</span>
+    <span class="kw">SET</span> <span class="nm">@txId</span> = <span class="kw">NEXT VALUE FOR</span> seq;
+    <span class="kw">SET</span> <span class="nm">@fee</span>  = <span class="nm">@amount</span> * <span class="num">0.01</span>;
+<span class="kw">END</span>;</code></pre>
+    </div>
+    <div>
+      <h3>C# out</h3>
+      <pre><code><span class="kw">public bool</span> ProcessPayment(
+    <span class="tp">decimal</span> amount,
+    <span class="kw">out int</span> txId,
+    <span class="kw">out</span> <span class="tp">decimal</span> fee)
+{
+    txId = GenerateNextId();
+    fee  = amount * <span class="num">0.01m</span>;
+    <span class="kw">return true</span>;
+}
+
+<span class="cm">// Calling it:</span>
+ProcessPayment(<span class="num">500m</span>, <span class="kw">out int</span> id, <span class="kw">out</span> <span class="tp">decimal</span> f);
+<span class="cm">// Discard if not needed:</span>
+ProcessPayment(<span class="num">500m</span>, <span class="kw">out int</span> id, <span class="kw">out</span> _);</code></pre>
+    </div>
+  </div>
+  <div class="highlight-box orange" style="margin-top:12px">
+    <p><strong>Compiler-enforced:</strong> <code>out</code> parameters <em>must</em> be assigned inside the method before it returns. If you forget, it won't compile. T-SQL has no such guarantee.</p>
+  </div>
+</div>
+
+<!-- SLIDE 17: TryParse pattern -->
+<div class="slide" id="slide-17">
+  <h2>The TryParse Pattern — out in Action</h2>
+  <p>The most common use of <code>out</code> in everyday C# code:</p>
+  <div class="columns">
+    <div>
+      <h3>T-SQL</h3>
+      <pre><code><span class="kw">DECLARE</span> <span class="nm">@result</span> <span class="tp">INT</span>;
+<span class="kw">SET</span> <span class="nm">@result</span> = <span class="kw">TRY_CAST</span>(<span class="nm">@input</span> <span class="kw">AS INT</span>);
+<span class="kw">IF</span> <span class="nm">@result</span> <span class="kw">IS NULL</span>
+    <span class="kw">PRINT</span> <span class="str">'Not valid'</span>;</code></pre>
+    </div>
+    <div>
+      <h3>C#</h3>
+      <pre><code><span class="kw">if</span> (<span class="tp">int</span>.TryParse(userInput, <span class="kw">out int</span> result))
+{
+    Console.WriteLine(<span class="nm">$</span><span class="str">"Parsed: {result}"</span>);
+}
+<span class="kw">else</span>
+{
+    Console.WriteLine(<span class="str">"Not a valid integer"</span>);
+}</code></pre>
+    </div>
+  </div>
+  <div class="highlight-box" style="margin-top:20px">
+    <p><code>TryParse</code> is the pattern where the method returns <code>bool</code> (success/failure) and gives you the parsed value via <code>out</code>. You'll see this everywhere: <code>decimal.TryParse</code>, <code>DateTime.TryParse</code>, <code>Guid.TryParse</code>.</p>
+  </div>
+</div>
+
+<!-- SLIDE 18: Overloading -->
+<div class="slide" id="slide-18">
+  <h2>Method Overloading — Same Name, Different Signatures</h2>
+  <div class="analogy">In T-SQL, two procedures with the same name would error. In C#, same name + different parameters = overloading.</div>
+  <pre><code><span class="cm">// Three overloads — compiler picks the right one</span>
+<span class="kw">public</span> <span class="tp">decimal</span> CalculateFee(<span class="tp">decimal</span> amount)
+    => CalculateFee(amount, <span class="str">"STANDARD"</span>);    <span class="cm">// delegate to full version</span>
+
+<span class="kw">public</span> <span class="tp">decimal</span> CalculateFee(<span class="tp">decimal</span> amount, <span class="tp">string</span> type)
+{
+    <span class="kw">return</span> type <span class="kw">switch</span>
+    {
+        <span class="str">"EXPRESS"</span> => amount * <span class="num">0.02m</span>,
+        <span class="str">"VIP"</span>     => <span class="num">0m</span>,
+        _          => amount * <span class="num">0.01m</span>
+    };
+}
+
+<span class="kw">public</span> <span class="tp">decimal</span> CalculateFee(<span class="tp">decimal</span> amount, <span class="tp">string</span> type, <span class="tp">bool</span> isWeekend)
+{
+    <span class="tp">decimal</span> fee = CalculateFee(amount, type);
+    <span class="kw">return</span> isWeekend ? fee * <span class="num">1.5m</span> : fee;
+}</code></pre>
+  <pre><code>CalculateFee(<span class="num">100m</span>);                       <span class="cm">// → calls overload 1</span>
+CalculateFee(<span class="num">100m</span>, <span class="str">"EXPRESS"</span>);            <span class="cm">// → calls overload 2</span>
+CalculateFee(<span class="num">100m</span>, <span class="str">"EXPRESS"</span>, <span class="kw">true</span>);     <span class="cm">// → calls overload 3</span></code></pre>
+</div>
+
+<!-- SLIDE 19: Expression-bodied + modern -->
+<div class="slide" id="slide-19">
+  <h2>Modern Method Syntax</h2>
+  <h3>Expression-Bodied Methods</h3>
+  <p>When the method body is a single expression, use <code>=&gt;</code> shorthand:</p>
+  <pre><code><span class="cm">// Full method</span>
+<span class="kw">public</span> <span class="tp">decimal</span> CalculateVat(<span class="tp">decimal</span> amount)
+{
+    <span class="kw">return</span> amount * <span class="num">0.20m</span>;
+}
+
+<span class="cm">// Expression-bodied (identical result)</span>
+<span class="kw">public</span> <span class="tp">decimal</span> CalculateVat(<span class="tp">decimal</span> amount) => amount * <span class="num">0.20m</span>;
+
+<span class="kw">public bool</span> IsPositive(<span class="tp">decimal</span> amount) => amount > <span class="num">0</span>;
+<span class="kw">public</span> <span class="tp">string</span> FormatAmount(<span class="tp">decimal</span> amount) => <span class="nm">$</span><span class="str">"{amount:C}"</span>;</code></pre>
+  <h3 style="margin-top:24px">Return a Tuple Instead of <code>out</code></h3>
+  <pre><code><span class="cm">// Modern preference: return a tuple instead of out parameters</span>
+<span class="kw">public</span> (<span class="tp">decimal</span> Fee, <span class="tp">string</span> Description) Calculate(<span class="tp">decimal</span> amount, <span class="tp">string</span> type)
+{
+    <span class="tp">decimal</span> fee = amount * <span class="num">0.01m</span>;
+    <span class="tp">string</span> desc = <span class="nm">$</span><span class="str">"Fee for {type}: {fee:C}"</span>;
+    <span class="kw">return</span> (fee, desc);
+}
+
+<span class="kw">var</span> (fee, desc) = Calculate(<span class="num">500m</span>, <span class="str">"WIT"</span>);   <span class="cm">// destructure the tuple</span></code></pre>
+</div>
+
+<!-- SLIDE 20: Quiz - methods -->
+<div class="slide" id="slide-20">
+  <h2>Quick Check</h2>
+  <p style="font-size:1.2em; margin-bottom:24px">A C# <code>out</code> parameter must be assigned inside the method before it returns. What happens if you forget?</p>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'q3')">A. It defaults to null or zero at runtime</div>
+  <div class="quiz-option" onclick="checkQuiz(this, true, 'q3')">B. The code won't compile — it's a compiler error</div>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'q3')">C. It throws a NullReferenceException at runtime</div>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'q3')">D. T-SQL's behavior: it stays as the value it had before the call</div>
+  <div class="quiz-feedback" id="q3-feedback-correct" class="correct">
+    ✓ Correct! The C# compiler enforces that all code paths must assign <code>out</code> parameters. This catches bugs at compile time that T-SQL would only reveal at runtime (or not at all).
+  </div>
+  <div class="quiz-feedback" id="q3-feedback-wrong" class="wrong">
+    ✗ Not quite. The C# compiler requires all <code>out</code> parameters to be assigned before the method returns — it's a compile-time error, not a runtime error.
+  </div>
+</div>
+
+<!-- SLIDE 21: The T-SQL → C# transformation -->
+<div class="slide" id="slide-21">
+  <h2>The Full Transformation</h2>
+  <div class="columns">
+    <div>
+      <h3>T-SQL Procedure</h3>
+      <pre style="font-size:0.82em"><code><span class="kw">CREATE PROCEDURE</span> usp_CalcFee
+    <span class="nm">@amount</span>  <span class="tp">DECIMAL</span>,
+    <span class="nm">@type</span>    <span class="tp">VARCHAR</span>(<span class="num">10</span>) = <span class="str">'STD'</span>,
+    <span class="nm">@fee</span>     <span class="tp">DECIMAL</span> <span class="kw">OUTPUT</span>
+<span class="kw">AS BEGIN</span>
+    <span class="kw">IF</span> <span class="nm">@type</span> = <span class="str">'EXP'</span>
+        <span class="kw">SET</span> <span class="nm">@fee</span> = <span class="nm">@amount</span> * <span class="num">0.02</span>;
+    <span class="kw">ELSE IF</span> <span class="nm">@type</span> = <span class="str">'VIP'</span>
+        <span class="kw">SET</span> <span class="nm">@fee</span> = <span class="num">0</span>;
+    <span class="kw">ELSE</span>
+        <span class="kw">SET</span> <span class="nm">@fee</span> = <span class="nm">@amount</span> * <span class="num">0.01</span>;
+<span class="kw">END</span>;</code></pre>
+    </div>
+    <div>
+      <h3>C# Method</h3>
+      <pre style="font-size:0.82em"><code><span class="kw">public</span> <span class="tp">decimal</span> CalcFee(
+    <span class="tp">decimal</span> amount,
+    <span class="tp">string</span> type = <span class="str">"STD"</span>)   <span class="cm">// default value</span>
+{
+    <span class="kw">return</span> type <span class="kw">switch</span>
+    {
+        <span class="str">"EXP"</span> => amount * <span class="num">0.02m</span>,
+        <span class="str">"VIP"</span> => <span class="num">0m</span>,
+        _      => amount * <span class="num">0.01m</span>
+    };
+    <span class="cm">// no OUTPUT, returns directly</span>
+}</code></pre>
+    </div>
+  </div>
+  <div class="highlight-box green" style="margin-top:16px">
+    <p>The C# version: returns value directly, uses switch expression, has a default parameter, is shorter and clearer.</p>
+  </div>
+</div>
+
+<!-- SLIDE 22: Exercise intro -->
+<div class="slide" id="slide-22">
+  <h2>Today's Exercise</h2>
+  <p class="subtitle">Rewrite the HSP fee calculation procedure as C# methods</p>
+  <div style="margin-top:20px">
+    <div class="highlight-box orange">
+      <h3>The Procedure</h3>
+      <p><code>usp_CalculateTransactionFee</code> — calculates fees for DEP/WIT/TRF/FEE transaction types with weekend surcharge and premium discount</p>
+    </div>
+    <div style="margin-top:16px">
+      <h3>Your Task (5 methods)</h3>
+      <ul>
+        <li>Exercise 1: <code>ValidateTransaction(amount, type)</code></li>
+        <li>Exercise 2: <code>CalculateBaseFee(amount, type)</code></li>
+        <li>Exercise 3: <code>ApplyMultipliers(baseFee, isWeekend, isPremium)</code></li>
+        <li>Exercise 4: <code>BuildFeeDescription(type, base, mult, final)</code></li>
+        <li>Exercise 5: <code>CalculateTransactionFee(...)</code> — composes them all</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 23: Code demo -->
+<div class="slide" id="slide-23">
+  <h2>Live Demo — Base Fee Calculation</h2>
+  <pre><code><span class="kw">static</span> <span class="tp">decimal</span> CalculateBaseFee(<span class="tp">decimal</span> amount, <span class="tp">string</span> transType)
+{
+    <span class="kw">return</span> transType <span class="kw">switch</span>
+    {
+        <span class="str">"DEP"</span> => <span class="num">0m</span>,
+        <span class="str">"WIT"</span> => amount <span class="kw">switch</span>
+        {
+            <= <span class="num">500m</span>   => <span class="num">2.50m</span>,
+            <= <span class="num">5_000m</span> => amount * <span class="num">0.005m</span>,
+            _           => amount * <span class="num">0.008m</span>
+        },
+        <span class="str">"TRF"</span> => amount * <span class="num">0.0025m</span>,
+        <span class="str">"FEE"</span> => amount,
+        _     => <span class="kw">throw new</span> <span class="tp">ArgumentException</span>(
+                     <span class="nm">$</span><span class="str">"Unknown type: {transType}"</span>)
+    };
+}</code></pre>
+  <div class="code-runner">
+    <div class="code-runner-header">
+      <span>Expected outputs</span>
+      <button class="run-btn" onclick="showOutput('demo1')">▶ Show Results</button>
+    </div>
+    <div class="code-output" id="demo1">
+CalculateBaseFee(1000m, "DEP")  → 0.00
+CalculateBaseFee(300m,  "WIT")  → 2.50
+CalculateBaseFee(3000m, "WIT")  → 15.00
+CalculateBaseFee(10000m,"TRF")  → 25.00
+CalculateBaseFee(50m,   "FEE")  → 50.00</div>
+  </div>
+</div>
+
+<!-- SLIDE 24: Summary table -->
+<div class="slide" id="slide-24">
+  <h2>Session 3 — Complete Reference</h2>
+  <table>
+    <tr><th>SQL Concept</th><th>C# Equivalent</th><th>Session</th></tr>
+    <tr><td><code>IF...ELSE IF...ELSE</code></td><td><code>if...else if...else</code></td><td>3</td></tr>
+    <tr><td><code>CASE WHEN...THEN...ELSE END</code></td><td>switch expression</td><td>3</td></tr>
+    <tr><td><code>IIF(cond, a, b)</code></td><td><code>cond ? a : b</code></td><td>3</td></tr>
+    <tr><td><code>ISNULL(x, default)</code></td><td><code>x ?? default</code></td><td>2, 3</td></tr>
+    <tr><td><code>WHILE</code></td><td><code>while</code></td><td>3</td></tr>
+    <tr><td>Cursor</td><td><code>foreach</code></td><td>3</td></tr>
+    <tr><td>Stored Procedure</td><td>Method</td><td>3</td></tr>
+    <tr><td>OUTPUT parameter</td><td><code>out</code> / return tuple</td><td>3</td></tr>
+    <tr><td>Default parameter value</td><td>Optional parameter with default</td><td>3</td></tr>
+    <tr><td>No overloading</td><td>Method overloading</td><td>3</td></tr>
+  </table>
+</div>
+
+<!-- SLIDE 25: What's next -->
+<div class="slide" id="slide-25">
+  <h2>What's Next — Session 4</h2>
+  <div class="columns">
+    <div>
+      <h3>Session 4: Classes &amp; Objects</h3>
+      <ul>
+        <li>Classes — like a table definition with behavior</li>
+        <li>Objects — like a row, but it can do things</li>
+        <li>Properties (<code>{ get; set; }</code>)</li>
+        <li>Constructors</li>
+        <li>Access modifiers in depth</li>
+        <li><code>static</code> members</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Homework</h3>
+      <div class="highlight-box">
+        <ul>
+          <li>Complete all 7 exercises in <code>04-hands-on-exercises.md</code></li>
+          <li>Ensure your output matches the expected values</li>
+          <li>Try the bonus overloading exercise</li>
+          <li>Read: <em>C# 12 in a Nutshell</em> — Chapter 3 (Classes)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="big-center" style="margin-top:30px">
+    <span class="tag tag-green">Control Flow ✓</span>
+    <span class="tag tag-green">Loops ✓</span>
+    <span class="tag tag-green">Methods ✓</span>
+    <span class="tag tag-blue">Classes → Next</span>
+  </div>
+</div>
+
+</div><!-- slide-container -->
+
+<nav class="nav">
+  <button id="prevBtn" onclick="navigate(-1)" disabled>← Prev</button>
+  <span class="slide-counter" id="slideCounter">1 / 25</span>
+  <button id="nextBtn" onclick="navigate(1)">Next →</button>
+</nav>
+
+<script>
+  const total = 25;
+  let current = 1;
+
+  function showSlide(n) {
+    document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+    document.getElementById('slide-' + n).classList.add('active');
+    document.getElementById('slideCounter').textContent = n + ' / ' + total;
+    document.getElementById('progressBar').style.width = (n / total * 100) + '%';
+    document.getElementById('prevBtn').disabled = n === 1;
+    document.getElementById('nextBtn').disabled = n === total;
+    current = n;
+  }
+
+  function navigate(dir) {
+    const next = current + dir;
+    if (next >= 1 && next <= total) showSlide(next);
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); navigate(1); }
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')                    { e.preventDefault(); navigate(-1); }
+    if (e.key === 'Home') showSlide(1);
+    if (e.key === 'End')  showSlide(total);
+  });
+
+  function checkQuiz(el, correct, qid) {
+    const opts = el.parentElement.querySelectorAll('.quiz-option');
+    opts.forEach(o => { o.style.pointerEvents = 'none'; });
+    el.classList.add(correct ? 'correct' : 'wrong');
+    if (!correct) {
+      opts.forEach(o => {
+        if (o.dataset && o.getAttribute('onclick') && o.getAttribute('onclick').includes('true')) {
+          o.classList.add('correct');
+        }
+      });
+    }
+    const feedbackCorrect = document.getElementById(qid + '-feedback-correct');
+    const feedbackWrong   = document.getElementById(qid + '-feedback-wrong');
+    if (feedbackCorrect) { feedbackCorrect.classList.toggle('show', correct); feedbackCorrect.classList.add(correct ? 'correct' : 'wrong'); }
+    if (feedbackWrong)   { feedbackWrong.classList.toggle('show', !correct);  feedbackWrong.classList.add('wrong'); }
+  }
+
+  function showOutput(id) {
+    const el = document.getElementById(id);
+    el.classList.add('show');
+  }
+
+  showSlide(1);
+</script>
+</body>
+</html>
