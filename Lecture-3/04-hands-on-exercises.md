@@ -8,8 +8,8 @@ Rewrite **real production functions** from our HSP database as C# methods. These
 
 ## Functions Used in This Exercise
 
-| # | Exercise | HSP Function | Source File | Difficulty |
-|---|---|---|---|---|
+| # | Exercise | HSP Function | Difficulty 
+|---|---|---|---|
 | 1 | Error Code Lookup | `hp.fnGetErrorNumberConstant` | Warm-up |
 | 2 | Action Result Classification | `hp.fnGetARCClassConstant` | Warm-up |
 | 3 | Document Verification Status | `hp.fnGetVerificationEnumById` | Easy |
