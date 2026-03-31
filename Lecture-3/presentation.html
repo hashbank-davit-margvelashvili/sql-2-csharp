@@ -54,13 +54,13 @@
   code { font-family: 'Cascadia Code','Fira Code','Consolas', monospace; font-size: 0.95em; }
   pre code { color: var(--text); }
   .kw { color: var(--accent); } .str { color: var(--green); } .cm { color: var(--text-dim); font-style: italic; }
-  .tp { color: var(--cyan); } .nm { color: var(--orange); } .num { color: #fb923c; }
+  .tp { color: var(--cyan); } .nm { color: var(--orange); } .num { color: var(--orange); }
   :not(pre) > code { background: var(--surface); padding: 3px 8px; border-radius: 6px; color: var(--cyan); }
   table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 1.05em; }
   th { background: var(--surface2); padding: 12px 16px; text-align: left; font-weight: 600; color: var(--accent); border-bottom: 2px solid var(--accent); }
   td { padding: 10px 16px; border-bottom: 1px solid var(--surface2); }
   tr:hover td { background: var(--surface); }
-  .columns { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
+  .columns { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
   .columns3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; align-items: start; }
   .highlight-box {
     background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(139,92,246,0.1));
@@ -71,9 +71,15 @@
   .highlight-box.red { background: linear-gradient(135deg, rgba(239,68,68,0.1), rgba(245,158,11,0.1)); border-color: rgba(239,68,68,0.3); }
   .analogy {
     background: var(--surface); border-left: 4px solid var(--orange);
-    border-radius: 0 12px 12px 0; padding: 16px 20px; margin: 16px 0; font-size: 1.05em;
+    border-radius: 0 12px 12px 0; padding: 16px 20px; margin: 16px 0; font-size: 1.1em;
   }
   .analogy::before { content: '🔗 SQL Analogy: '; color: var(--orange); font-weight: 600; }
+  .step { display: flex; align-items: flex-start; gap: 16px; margin: 12px 0; }
+  .step-num {
+    flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%; background: var(--accent);
+    color: white; display: flex; align-items: center; justify-content: center; font-weight: 700;
+  }
+  .step-content { padding-top: 5px; }
   .quiz-option {
     background: var(--surface); border: 2px solid var(--surface2); border-radius: 10px;
     padding: 14px 20px; margin: 8px 0; cursor: pointer; transition: all 0.2s; font-size: 1.05em;
@@ -91,6 +97,32 @@
   .run-btn:hover { opacity: 0.85; transform: scale(1.02); }
   .code-output { border-top: 1px solid var(--surface2); padding: 12px 16px; font-family: 'Cascadia Code', monospace; font-size: 0.9em; color: var(--green); display: none; white-space: pre-wrap; }
   .code-output.show { display: block; }
+  .flow { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; margin: 20px 0; }
+  .flow-box { background: var(--surface); border: 2px solid var(--accent); border-radius: 10px; padding: 12px 20px; font-weight: 600; text-align: center; min-width: 120px; }
+  .flow-box.sql { border-color: var(--orange); }
+  .flow-arrow { color: var(--text-dim); font-size: 1.5em; font-weight: bold; }
+  .nav { position: fixed; bottom: 30px; right: 40px; display: flex; gap: 12px; align-items: center; z-index: 50; }
+  .nav button { background: var(--surface); border: 1px solid var(--surface2); color: var(--text); width: 48px; height: 48px; border-radius: 50%; cursor: pointer; font-size: 1.2em; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+  .nav button:hover { background: var(--accent); border-color: var(--accent); }
+  .nav button:disabled { opacity: 0.3; cursor: not-allowed; }
+  .slide-counter { color: var(--text-dim); font-size: 0.95em; min-width: 60px; text-align: center; }
+  .title-slide { text-align: center; }
+  .title-slide h1 { font-size: 3.2em; margin-bottom: 8px; }
+  .session-info { display: inline-flex; gap: 24px; margin-top: 40px; color: var(--text-dim); font-size: 1em; }
+  .session-info span { background: var(--surface); padding: 8px 20px; border-radius: 20px; border: 1px solid var(--surface2); }
+  .reveal-item { opacity: 0; transform: translateY(10px); transition: all 0.3s ease; }
+  .reveal-item.visible { opacity: 1; transform: translateY(0); }
+  .keyboard-hints { position: fixed; bottom: 30px; left: 40px; color: var(--text-dim); font-size: 0.85em; z-index: 50; }
+  kbd { background: var(--surface); border: 1px solid var(--surface2); padding: 2px 8px; border-radius: 4px; font-family: monospace; font-size: 0.9em; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 0.85em; font-weight: 600; }
+  .badge.value { background: rgba(6,182,212,0.2); color: var(--cyan); }
+  .badge.ref { background: rgba(139,92,246,0.2); color: var(--accent2); }
+  .memory-diagram { display: flex; gap: 40px; justify-content: center; margin: 20px 0; }
+  .mem-box { background: var(--surface); border: 2px solid var(--surface2); border-radius: 10px; padding: 16px 24px; text-align: center; min-width: 140px; }
+  .mem-box .label { color: var(--text-dim); font-size: 0.85em; margin-bottom: 8px; }
+  .mem-box .value { font-size: 1.4em; font-weight: 700; font-family: 'Cascadia Code', monospace; }
+  .mem-box.highlight { border-color: var(--accent); }
+  .mem-arrow { display: flex; align-items: center; color: var(--accent); font-size: 1.5em; }
   .tag {
     display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.85em;
     font-weight: 600; margin: 2px;
@@ -99,39 +131,16 @@
   .tag-green { background: rgba(34,197,94,0.2); color: var(--green); border: 1px solid rgba(34,197,94,0.4); }
   .tag-orange { background: rgba(245,158,11,0.2); color: var(--orange); border: 1px solid rgba(245,158,11,0.4); }
   .big-center { text-align: center; margin: 30px 0; }
-  .huge { font-size: 3em; font-weight: 700; color: var(--accent); }
-  .nav {
-    position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
-    display: flex; gap: 16px; align-items: center; z-index: 50;
-    background: rgba(30,41,59,0.95); border: 1px solid var(--surface2);
-    padding: 12px 24px; border-radius: 50px; backdrop-filter: blur(8px);
-  }
-  .nav button {
-    background: var(--accent); color: white; border: none; padding: 10px 24px;
-    border-radius: 24px; font-size: 0.95em; font-weight: 600; cursor: pointer; transition: all 0.2s;
-  }
-  .nav button:hover { opacity: 0.85; transform: scale(1.04); }
-  .nav button:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
-  .slide-counter { color: var(--text-dim); font-size: 0.9em; min-width: 70px; text-align: center; }
-  .kbd { background: var(--surface2); border: 1px solid var(--text-dim); border-radius: 6px; padding: 2px 8px; font-family: monospace; font-size: 0.9em; }
-  .badge { display: inline-block; background: var(--accent2); color: white; border-radius: 6px; padding: 2px 10px; font-size: 0.85em; font-weight: 600; margin-left: 8px; }
-  .timeline { display: flex; gap: 0; margin: 20px 0; }
-  .timeline-item { flex: 1; text-align: center; position: relative; padding-top: 50px; }
-  .timeline-item::before { content:''; position: absolute; top: 20px; left: 0; right: 0; height: 3px; background: var(--surface2); }
-  .timeline-item:first-child::before { left: 50%; }
-  .timeline-item:last-child::before { right: 50%; }
-  .timeline-dot { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 22px; height: 22px; border-radius: 50%; background: var(--accent); border: 3px solid var(--bg); z-index: 1; }
-  .timeline-label { font-size: 0.9em; color: var(--text-dim); margin-top: 6px; }
   .session-header { color: var(--text-dim); font-size: 1em; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+  @media (max-width: 900px) { .slide-container { padding: 20px 30px; } .columns { grid-template-columns: 1fr; gap: 20px; } h1 { font-size: 2em; } h2 { font-size: 1.6em; } }
 </style>
 </head>
 <body>
-
 <div class="progress-bar" id="progressBar"></div>
 
 <!-- SLIDE 1: Title -->
 <div class="slide-container">
-<div class="slide active" id="slide-1">
+<div class="slide active" data-slide="1">
   <div class="session-header">Session 3 · Block A: Foundations of C#</div>
   <h1>Control Flow &amp; Methods</h1>
   <p class="subtitle">From T-SQL procedures to C# methods that actually return values</p>
@@ -158,7 +167,7 @@
 </div>
 
 <!-- SLIDE 2: IF/ELSE -->
-<div class="slide" id="slide-2">
+<div class="slide" data-slide="2">
   <h2>if / else — You Already Know This</h2>
   <div class="columns">
     <div>
@@ -196,7 +205,7 @@
 </div>
 
 <!-- SLIDE 3: Ternary + Null Coalescing -->
-<div class="slide" id="slide-3">
+<div class="slide" data-slide="3">
   <h2>Ternary &amp; Null-Coalescing</h2>
   <h3>IIF() → Ternary Operator <code>? :</code></h3>
   <div class="columns">
@@ -235,7 +244,7 @@ discount ??= <span class="num">0m</span>;</code></pre>
 </div>
 
 <!-- SLIDE 4: switch expression -->
-<div class="slide" id="slide-4">
+<div class="slide" data-slide="4">
   <h2>switch Expression — Beyond CASE WHEN</h2>
   <h3>T-SQL CASE WHEN</h3>
   <pre><code><span class="kw">SET</span> <span class="nm">@desc</span> = <span class="kw">CASE</span> <span class="nm">@type</span>
@@ -243,7 +252,7 @@ discount ??= <span class="num">0m</span>;</code></pre>
     <span class="kw">WHEN</span> <span class="str">'WIT'</span> <span class="kw">THEN</span> <span class="str">'Withdrawal'</span>
     <span class="kw">ELSE</span> <span class="str">'Unknown'</span>
 <span class="kw">END</span>;</code></pre>
-  <h3 style="margin-top:20px">C# switch expression <span class="badge">Modern</span></h3>
+  <h3 style="margin-top:20px">C# switch expression <span class="badge" style="background:var(--accent2);color:white;margin-left:8px;">Modern</span></h3>
   <pre><code><span class="tp">string</span> desc = type <span class="kw">switch</span>
 {
     <span class="str">"DEP"</span> => <span class="str">"Deposit"</span>,
@@ -257,7 +266,7 @@ discount ??= <span class="num">0m</span>;</code></pre>
 </div>
 
 <!-- SLIDE 5: Pattern matching -->
-<div class="slide" id="slide-5">
+<div class="slide" data-slide="5">
   <h2>Pattern Matching — SQL Has No Equivalent</h2>
   <p>C# switch expressions go beyond simple value matching:</p>
   <pre><code><span class="cm">// Match on value ranges</span>
@@ -281,23 +290,23 @@ discount ??= <span class="num">0m</span>;</code></pre>
 </div>
 
 <!-- SLIDE 6: Quiz - control flow -->
-<div class="slide" id="slide-6">
+<div class="slide" data-slide="6">
   <h2>Quick Check</h2>
   <p style="font-size:1.2em; margin-bottom:24px">What is the C# equivalent of SQL's <code>ISNULL(@discount, 0)</code>?</p>
   <div class="quiz-option" onclick="checkQuiz(this, false, 'q1')">A. <code>discount.HasValue ? discount : 0m</code></div>
   <div class="quiz-option" onclick="checkQuiz(this, true, 'q1')">B. <code>discount ?? 0m</code></div>
   <div class="quiz-option" onclick="checkQuiz(this, false, 'q1')">C. <code>discount == null ? 0m : discount</code></div>
   <div class="quiz-option" onclick="checkQuiz(this, false, 'q1')">D. <code>NullCoalesce(discount, 0m)</code></div>
-  <div class="quiz-feedback" id="q1-feedback-correct" class="correct">
+  <div class="quiz-feedback correct" id="q1-correct">
     ✓ Correct! <code>??</code> is the null-coalescing operator — returns the left side if not null, otherwise the right side. Option C would also work, but <code>??</code> is idiomatic C#.
   </div>
-  <div class="quiz-feedback" id="q1-feedback-wrong" class="wrong">
+  <div class="quiz-feedback wrong" id="q1-wrong">
     ✗ Not quite. The null-coalescing operator <code>??</code> is the direct C# equivalent of <code>ISNULL(x, default)</code>.
   </div>
 </div>
 
 <!-- SLIDE 7: Loops overview -->
-<div class="slide" id="slide-7">
+<div class="slide" data-slide="7">
   <h2>Loops — T-SQL Has One. C# Has Four.</h2>
   <table>
     <tr><th>Loop</th><th>When to Use</th><th>SQL Analogy</th></tr>
@@ -312,7 +321,7 @@ discount ??= <span class="num">0m</span>;</code></pre>
 </div>
 
 <!-- SLIDE 8: while -->
-<div class="slide" id="slide-8">
+<div class="slide" data-slide="8">
   <h2>while — Direct WHILE Translation</h2>
   <div class="columns">
     <div>
@@ -350,7 +359,7 @@ i /= <span class="num">4</span>; <span class="cm">// i = i / 4</span></code></pr
 </div>
 
 <!-- SLIDE 9: for -->
-<div class="slide" id="slide-9">
+<div class="slide" data-slide="9">
   <h2>for — When You Know the Count</h2>
   <pre><code><span class="cm">// for (initializer; condition; increment)</span>
 <span class="kw">for</span> (<span class="tp">int</span> i = <span class="num">0</span>; i < <span class="num">10</span>; i++)
@@ -384,7 +393,7 @@ i /= <span class="num">4</span>; <span class="cm">// i = i / 4</span></code></pr
 </div>
 
 <!-- SLIDE 10: foreach -->
-<div class="slide" id="slide-10">
+<div class="slide" data-slide="10">
   <h2>foreach — Your Cursor Replacement</h2>
   <div class="columns">
     <div>
@@ -421,7 +430,7 @@ i /= <span class="num">4</span>; <span class="cm">// i = i / 4</span></code></pr
 </div>
 
 <!-- SLIDE 11: break and continue -->
-<div class="slide" id="slide-11">
+<div class="slide" data-slide="11">
   <h2>break and continue</h2>
   <div class="columns">
     <div>
@@ -451,23 +460,23 @@ i /= <span class="num">4</span>; <span class="cm">// i = i / 4</span></code></pr
 </div>
 
 <!-- SLIDE 12: Quiz - loops -->
-<div class="slide" id="slide-12">
+<div class="slide" data-slide="12">
   <h2>Quick Check</h2>
   <p style="font-size:1.2em; margin-bottom:24px">You need to iterate over a <code>List&lt;Transaction&gt;</code> and process each item. Which loop should you use?</p>
   <div class="quiz-option" onclick="checkQuiz(this, false, 'q2')">A. <code>while</code> with a counter variable</div>
   <div class="quiz-option" onclick="checkQuiz(this, false, 'q2')">B. <code>for</code> loop</div>
   <div class="quiz-option" onclick="checkQuiz(this, true, 'q2')">C. <code>foreach</code> loop</div>
   <div class="quiz-option" onclick="checkQuiz(this, false, 'q2')">D. <code>do-while</code> loop</div>
-  <div class="quiz-feedback" id="q2-feedback-correct" class="correct">
+  <div class="quiz-feedback correct" id="q2-correct">
     ✓ Correct! <code>foreach</code> is the natural choice for iterating over collections. It handles all the bookkeeping automatically — exactly like replacing a cursor with set-based SQL.
   </div>
-  <div class="quiz-feedback" id="q2-feedback-wrong" class="wrong">
+  <div class="quiz-feedback wrong" id="q2-wrong">
     ✗ <code>foreach</code> is the right answer. When you have a collection and want to process each element, <code>foreach</code> is cleaner, safer, and idiomatic C#.
   </div>
 </div>
 
 <!-- SLIDE 13: Methods intro -->
-<div class="slide" id="slide-13">
+<div class="slide" data-slide="13">
   <h2>Methods — Stored Procedures That Return Values</h2>
   <table>
     <tr><th>T-SQL Stored Procedure</th><th>C# Method</th></tr>
@@ -482,7 +491,7 @@ i /= <span class="num">4</span>; <span class="cm">// i = i / 4</span></code></pr
 </div>
 
 <!-- SLIDE 14: Method anatomy -->
-<div class="slide" id="slide-14">
+<div class="slide" data-slide="14">
   <h2>Anatomy of a Method</h2>
   <pre><code><span class="cm">// access modifier  return type   name          parameters</span>
    <span class="kw">public</span>           <span class="tp">decimal</span>       CalculateFee  (<span class="tp">decimal</span> amount, <span class="tp">string</span> type)
@@ -510,7 +519,7 @@ i /= <span class="num">4</span>; <span class="cm">// i = i / 4</span></code></pr
 </div>
 
 <!-- SLIDE 15: Parameters -->
-<div class="slide" id="slide-15">
+<div class="slide" data-slide="15">
   <h2>Parameters — Required and Optional</h2>
   <h3>Required Parameters</h3>
   <div class="columns">
@@ -552,7 +561,7 @@ CalcFee(<span class="num">100m</span>, <span class="str">"WIT"</span>);    <span
 </div>
 
 <!-- SLIDE 16: out parameters -->
-<div class="slide" id="slide-16">
+<div class="slide" data-slide="16">
   <h2><code>out</code> — The OUTPUT Parameter</h2>
   <div class="columns">
     <div>
@@ -591,7 +600,7 @@ ProcessPayment(<span class="num">500m</span>, <span class="kw">out int</span> id
 </div>
 
 <!-- SLIDE 17: TryParse pattern -->
-<div class="slide" id="slide-17">
+<div class="slide" data-slide="17">
   <h2>The TryParse Pattern — out in Action</h2>
   <p>The most common use of <code>out</code> in everyday C# code:</p>
   <div class="columns">
@@ -620,7 +629,7 @@ ProcessPayment(<span class="num">500m</span>, <span class="kw">out int</span> id
 </div>
 
 <!-- SLIDE 18: Overloading -->
-<div class="slide" id="slide-18">
+<div class="slide" data-slide="18">
   <h2>Method Overloading — Same Name, Different Signatures</h2>
   <div class="analogy">In T-SQL, two procedures with the same name would error. In C#, same name + different parameters = overloading.</div>
   <pre><code><span class="cm">// Three overloads — compiler picks the right one</span>
@@ -643,12 +652,12 @@ ProcessPayment(<span class="num">500m</span>, <span class="kw">out int</span> id
     <span class="kw">return</span> isWeekend ? fee * <span class="num">1.5m</span> : fee;
 }</code></pre>
   <pre><code>CalculateFee(<span class="num">100m</span>);                       <span class="cm">// → calls overload 1</span>
-CalculateFee(<span class="num">100m</span>, <span class="str">"EXPRESS"</span>);            <span class="cm">// → calls overload 2</span>
-CalculateFee(<span class="num">100m</span>, <span class="str">"EXPRESS"</span>, <span class="kw">true</span>);     <span class="cm">// → calls overload 3</span></code></pre>
+ CalculateFee(<span class="num">100m</span>, <span class="str">"EXPRESS"</span>);            <span class="cm">// → calls overload 2</span>
+ CalculateFee(<span class="num">100m</span>, <span class="str">"EXPRESS"</span>, <span class="kw">true</span>);     <span class="cm">// → calls overload 3</span></code></pre>
 </div>
 
 <!-- SLIDE 19: Expression-bodied + modern -->
-<div class="slide" id="slide-19">
+<div class="slide" data-slide="19">
   <h2>Modern Method Syntax</h2>
   <h3>Expression-Bodied Methods</h3>
   <p>When the method body is a single expression, use <code>=&gt;</code> shorthand:</p>
@@ -676,23 +685,23 @@ CalculateFee(<span class="num">100m</span>, <span class="str">"EXPRESS"</span>, 
 </div>
 
 <!-- SLIDE 20: Quiz - methods -->
-<div class="slide" id="slide-20">
+<div class="slide" data-slide="20">
   <h2>Quick Check</h2>
   <p style="font-size:1.2em; margin-bottom:24px">A C# <code>out</code> parameter must be assigned inside the method before it returns. What happens if you forget?</p>
   <div class="quiz-option" onclick="checkQuiz(this, false, 'q3')">A. It defaults to null or zero at runtime</div>
   <div class="quiz-option" onclick="checkQuiz(this, true, 'q3')">B. The code won't compile — it's a compiler error</div>
   <div class="quiz-option" onclick="checkQuiz(this, false, 'q3')">C. It throws a NullReferenceException at runtime</div>
   <div class="quiz-option" onclick="checkQuiz(this, false, 'q3')">D. T-SQL's behavior: it stays as the value it had before the call</div>
-  <div class="quiz-feedback" id="q3-feedback-correct" class="correct">
+  <div class="quiz-feedback correct" id="q3-correct">
     ✓ Correct! The C# compiler enforces that all code paths must assign <code>out</code> parameters. This catches bugs at compile time that T-SQL would only reveal at runtime (or not at all).
   </div>
-  <div class="quiz-feedback" id="q3-feedback-wrong" class="wrong">
+  <div class="quiz-feedback wrong" id="q3-wrong">
     ✗ Not quite. The C# compiler requires all <code>out</code> parameters to be assigned before the method returns — it's a compile-time error, not a runtime error.
   </div>
 </div>
 
 <!-- SLIDE 21: The T-SQL → C# transformation -->
-<div class="slide" id="slide-21">
+<div class="slide" data-slide="21">
   <h2>The Full Transformation</h2>
   <div class="columns">
     <div>
@@ -732,7 +741,7 @@ CalculateFee(<span class="num">100m</span>, <span class="str">"EXPRESS"</span>, 
 </div>
 
 <!-- SLIDE 22: Exercise intro -->
-<div class="slide" id="slide-22">
+<div class="slide" data-slide="22">
   <h2>Today's Exercise</h2>
   <p class="subtitle">Rewrite the HSP fee calculation procedure as C# methods</p>
   <div style="margin-top:20px">
@@ -754,7 +763,7 @@ CalculateFee(<span class="num">100m</span>, <span class="str">"EXPRESS"</span>, 
 </div>
 
 <!-- SLIDE 23: Code demo -->
-<div class="slide" id="slide-23">
+<div class="slide" data-slide="23">
   <h2>Live Demo — Base Fee Calculation</h2>
   <pre><code><span class="kw">static</span> <span class="tp">decimal</span> CalculateBaseFee(<span class="tp">decimal</span> amount, <span class="tp">string</span> transType)
 {
@@ -776,19 +785,19 @@ CalculateFee(<span class="num">100m</span>, <span class="str">"EXPRESS"</span>, 
   <div class="code-runner">
     <div class="code-runner-header">
       <span>Expected outputs</span>
-      <button class="run-btn" onclick="showOutput('demo1')">▶ Show Results</button>
+      <button class="run-btn" onclick="simulateRun(this,'demo1')">&#9654; Run</button>
     </div>
     <div class="code-output" id="demo1">
-CalculateBaseFee(1000m, "DEP")  → 0.00
-CalculateBaseFee(300m,  "WIT")  → 2.50
-CalculateBaseFee(3000m, "WIT")  → 15.00
-CalculateBaseFee(10000m,"TRF")  → 25.00
-CalculateBaseFee(50m,   "FEE")  → 50.00</div>
+ CalculateBaseFee(1000m, "DEP")  → 0.00
+ CalculateBaseFee(300m,  "WIT")  → 2.50
+ CalculateBaseFee(3000m, "WIT")  → 15.00
+ CalculateBaseFee(10000m,"TRF")  → 25.00
+ CalculateBaseFee(50m,   "FEE")  → 50.00</div>
   </div>
 </div>
 
 <!-- SLIDE 24: Summary table -->
-<div class="slide" id="slide-24">
+<div class="slide" data-slide="24">
   <h2>Session 3 — Complete Reference</h2>
   <table>
     <tr><th>SQL Concept</th><th>C# Equivalent</th><th>Session</th></tr>
@@ -806,7 +815,7 @@ CalculateBaseFee(50m,   "FEE")  → 50.00</div>
 </div>
 
 <!-- SLIDE 25: What's next -->
-<div class="slide" id="slide-25">
+<div class="slide" data-slide="25">
   <h2>What's Next — Session 4</h2>
   <div class="columns">
     <div>
@@ -840,63 +849,61 @@ CalculateBaseFee(50m,   "FEE")  → 50.00</div>
   </div>
 </div>
 
-</div><!-- slide-container -->
+</div><!-- /slide-container -->
 
-<nav class="nav">
-  <button id="prevBtn" onclick="navigate(-1)" disabled>← Prev</button>
+<div class="nav">
+  <button id="prevBtn" onclick="navigate(-1)" disabled>&#8592;</button>
   <span class="slide-counter" id="slideCounter">1 / 25</span>
-  <button id="nextBtn" onclick="navigate(1)">Next →</button>
-</nav>
+  <button id="nextBtn" onclick="navigate(1)">&#8594;</button>
+</div>
+<div class="keyboard-hints"><kbd>&#8592;</kbd> <kbd>&#8594;</kbd> Navigate &nbsp;&bull;&nbsp; <kbd>Space</kbd> Next &nbsp;&bull;&nbsp; <kbd>R</kbd> Reveal items</div>
 
 <script>
-  const total = 25;
-  let current = 1;
-
+  let currentSlide = 1;
+  const totalSlides = document.querySelectorAll('.slide').length;
   function showSlide(n) {
     document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
-    document.getElementById('slide-' + n).classList.add('active');
-    document.getElementById('slideCounter').textContent = n + ' / ' + total;
-    document.getElementById('progressBar').style.width = (n / total * 100) + '%';
-    document.getElementById('prevBtn').disabled = n === 1;
-    document.getElementById('nextBtn').disabled = n === total;
-    current = n;
+    const t = document.querySelector(`[data-slide="${n}"]`);
+    if (t) { t.classList.add('active'); currentSlide = n; updateUI(); revealItems(); }
   }
-
-  function navigate(dir) {
-    const next = current + dir;
-    if (next >= 1 && next <= total) showSlide(next);
+  function navigate(d) { const n = currentSlide + d; if (n >= 1 && n <= totalSlides) showSlide(n); }
+  function updateUI() {
+    document.getElementById('slideCounter').textContent = `${currentSlide} / ${totalSlides}`;
+    document.getElementById('prevBtn').disabled = currentSlide === 1;
+    document.getElementById('nextBtn').disabled = currentSlide === totalSlides;
+    document.getElementById('progressBar').style.width = `${(currentSlide / totalSlides) * 100}%`;
   }
-
-  document.addEventListener('keydown', e => {
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); navigate(1); }
-    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')                    { e.preventDefault(); navigate(-1); }
-    if (e.key === 'Home') showSlide(1);
-    if (e.key === 'End')  showSlide(total);
-  });
-
+  function revealItems() {
+    const items = document.querySelector('.slide.active').querySelectorAll('.reveal-item:not(.visible)');
+    items.forEach((item, i) => setTimeout(() => item.classList.add('visible'), 200 * (i + 1)));
+  }
+  function simulateRun(btn, id) {
+    btn.textContent = '⏳ Running...'; btn.disabled = true;
+    setTimeout(() => {
+      document.getElementById(id).classList.add('show');
+      btn.textContent = '✓ Done';
+      setTimeout(() => { btn.textContent = '▶ Run'; btn.disabled = false; }, 2000);
+    }, 800);
+  }
   function checkQuiz(el, correct, qid) {
-    const opts = el.parentElement.querySelectorAll('.quiz-option');
-    opts.forEach(o => { o.style.pointerEvents = 'none'; });
+    const s = el.closest('.slide');
+    s.querySelectorAll('.quiz-option').forEach(o => { o.classList.remove('correct','wrong'); o.style.pointerEvents = 'none'; });
+    s.querySelectorAll('.quiz-feedback').forEach(f => f.classList.remove('show'));
     el.classList.add(correct ? 'correct' : 'wrong');
-    if (!correct) {
-      opts.forEach(o => {
-        if (o.dataset && o.getAttribute('onclick') && o.getAttribute('onclick').includes('true')) {
-          o.classList.add('correct');
-        }
-      });
-    }
-    const feedbackCorrect = document.getElementById(qid + '-feedback-correct');
-    const feedbackWrong   = document.getElementById(qid + '-feedback-wrong');
-    if (feedbackCorrect) { feedbackCorrect.classList.toggle('show', correct); feedbackCorrect.classList.add(correct ? 'correct' : 'wrong'); }
-    if (feedbackWrong)   { feedbackWrong.classList.toggle('show', !correct);  feedbackWrong.classList.add('wrong'); }
+    document.getElementById(qid + (correct ? '-correct' : '-wrong')).classList.add('show');
+    setTimeout(() => s.querySelectorAll('.quiz-option').forEach(o => o.style.pointerEvents = 'auto'), 3000);
   }
-
-  function showOutput(id) {
-    const el = document.getElementById(id);
-    el.classList.add('show');
-  }
-
-  showSlide(1);
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); navigate(1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); navigate(-1); }
+    if (e.key === 'r' || e.key === 'R') revealItems();
+    if (e.key === 'Home') showSlide(1);
+    if (e.key === 'End') showSlide(totalSlides);
+  });
+  let touchX = 0;
+  document.addEventListener('touchstart', e => touchX = e.touches[0].clientX);
+  document.addEventListener('touchend', e => { const d = touchX - e.changedTouches[0].clientX; if (Math.abs(d) > 50) navigate(d > 0 ? 1 : -1); });
+  updateUI(); revealItems();
 </script>
 </body>
 </html>
