@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Session 4: Classes, Objects, and Access Modifiers</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface2: #334155;
+    --accent: #3b82f6;
+    --accent2: #8b5cf6;
+    --text: #e2e8f0;
+    --text-dim: #94a3b8;
+    --green: #22c55e;
+    --orange: #f59e0b;
+    --red: #ef4444;
+    --cyan: #06b6d4;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg); color: var(--text); overflow: hidden; height: 100vh;
+  }
+  .progress-bar {
+    position: fixed; top: 0; left: 0; height: 4px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.4s ease; z-index: 100;
+  }
+  .slide-container {
+    width: 100vw; height: 100vh; display: flex;
+    align-items: center; justify-content: center; padding: 40px 80px;
+  }
+  .slide { display: none; width: 100%; max-width: 1100px; animation: fadeIn 0.4s ease; }
+  .slide.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+  h1 {
+    font-size: 2.8em; font-weight: 700; margin-bottom: 12px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  h2 { font-size: 2.2em; font-weight: 600; margin-bottom: 30px; }
+  h3 { font-size: 1.3em; font-weight: 600; margin-bottom: 16px; color: var(--accent); }
+  .subtitle { font-size: 1.3em; color: var(--text-dim); margin-bottom: 40px; }
+  p, li { font-size: 1.15em; line-height: 1.7; }
+  ul { list-style: none; padding: 0; }
+  ul li { padding: 8px 0 8px 28px; position: relative; }
+  ul li::before { content:'▸'; position:absolute; left:0; color:var(--accent); font-weight:bold; }
+  pre {
+    background: var(--surface); border: 1px solid var(--surface2); border-radius: 12px;
+    padding: 20px 24px; overflow-x: auto; margin: 16px 0; font-size: 0.95em;
+  }
+  code { font-family: 'Cascadia Code','Fira Code','Consolas', monospace; font-size: 0.95em; }
+  pre code { color: var(--text); }
+  .kw { color: var(--accent); } .str { color: var(--green); } .cm { color: var(--text-dim); font-style: italic; }
+  .tp { color: var(--cyan); } .nm { color: var(--orange); } .num { color: var(--orange); }
+  :not(pre) > code { background: var(--surface); padding: 3px 8px; border-radius: 6px; color: var(--cyan); }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 1.05em; }
+  th { background: var(--surface2); padding: 12px 16px; text-align: left; font-weight: 600; color: var(--accent); border-bottom: 2px solid var(--accent); }
+  td { padding: 10px 16px; border-bottom: 1px solid var(--surface2); }
+  tr:hover td { background: var(--surface); }
+  .columns { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
+  .columns3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; align-items: start; }
+  .highlight-box {
+    background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(139,92,246,0.1));
+    border: 1px solid rgba(59,130,246,0.3); border-radius: 12px; padding: 20px 24px; margin: 16px 0;
+  }
+  .highlight-box.green { background: linear-gradient(135deg, rgba(34,197,94,0.1), rgba(6,182,212,0.1)); border-color: rgba(34,197,94,0.3); }
+  .highlight-box.orange { background: linear-gradient(135deg, rgba(245,158,11,0.1), rgba(239,68,68,0.1)); border-color: rgba(245,158,11,0.3); }
+  .highlight-box.red { background: linear-gradient(135deg, rgba(239,68,68,0.1), rgba(245,158,11,0.1)); border-color: rgba(239,68,68,0.3); }
+  .analogy {
+    background: var(--surface); border-left: 4px solid var(--orange);
+    border-radius: 0 12px 12px 0; padding: 16px 20px; margin: 16px 0; font-size: 1.1em;
+  }
+  .analogy::before { content: '🔗 SQL Analogy: '; color: var(--orange); font-weight: 600; }
+  .step { display: flex; align-items: flex-start; gap: 16px; margin: 12px 0; }
+  .step-num {
+    flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%; background: var(--accent);
+    color: white; display: flex; align-items: center; justify-content: center; font-weight: 700;
+  }
+  .step-content { padding-top: 5px; }
+  .quiz-option {
+    background: var(--surface); border: 2px solid var(--surface2); border-radius: 10px;
+    padding: 14px 20px; margin: 8px 0; cursor: pointer; transition: all 0.2s; font-size: 1.05em;
+  }
+  .quiz-option:hover { border-color: var(--accent); background: var(--surface2); }
+  .quiz-option.correct { border-color: var(--green); background: rgba(34,197,94,0.15); }
+  .quiz-option.wrong { border-color: var(--red); background: rgba(239,68,68,0.1); }
+  .quiz-feedback { margin-top: 12px; padding: 12px 16px; border-radius: 8px; display: none; font-size: 1.05em; }
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.correct { background: rgba(34,197,94,0.15); color: var(--green); }
+  .quiz-feedback.wrong { background: rgba(239,68,68,0.1); color: var(--red); }
+  .code-runner { background: var(--surface); border: 1px solid var(--surface2); border-radius: 12px; overflow: hidden; margin: 16px 0; }
+  .code-runner-header { background: var(--surface2); padding: 8px 16px; display: flex; justify-content: space-between; align-items: center; font-size: 0.9em; color: var(--text-dim); }
+  .run-btn { background: var(--green); color: white; border: none; padding: 6px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: all 0.2s; }
+  .run-btn:hover { opacity: 0.85; transform: scale(1.02); }
+  .code-output { border-top: 1px solid var(--surface2); padding: 12px 16px; font-family: 'Cascadia Code', monospace; font-size: 0.9em; color: var(--green); display: none; white-space: pre-wrap; }
+  .code-output.show { display: block; }
+  .flow { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; margin: 20px 0; }
+  .flow-box { background: var(--surface); border: 2px solid var(--accent); border-radius: 10px; padding: 12px 20px; font-weight: 600; text-align: center; min-width: 120px; }
+  .flow-box.sql { border-color: var(--orange); }
+  .flow-arrow { color: var(--text-dim); font-size: 1.5em; font-weight: bold; }
+  .nav { position: fixed; bottom: 30px; right: 40px; display: flex; gap: 12px; align-items: center; z-index: 50; }
+  .nav button { background: var(--surface); border: 1px solid var(--surface2); color: var(--text); width: 48px; height: 48px; border-radius: 50%; cursor: pointer; font-size: 1.2em; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+  .nav button:hover { background: var(--accent); border-color: var(--accent); }
+  .nav button:disabled { opacity: 0.3; cursor: not-allowed; }
+  .slide-counter { color: var(--text-dim); font-size: 0.95em; min-width: 60px; text-align: center; }
+  .title-slide { text-align: center; }
+  .title-slide h1 { font-size: 3.2em; margin-bottom: 8px; }
+  .session-info { display: inline-flex; gap: 24px; margin-top: 40px; color: var(--text-dim); font-size: 1em; }
+  .session-info span { background: var(--surface); padding: 8px 20px; border-radius: 20px; border: 1px solid var(--surface2); }
+  .reveal-item { opacity: 0; transform: translateY(10px); transition: all 0.3s ease; }
+  .reveal-item.visible { opacity: 1; transform: translateY(0); }
+  .keyboard-hints { position: fixed; bottom: 30px; left: 40px; color: var(--text-dim); font-size: 0.85em; z-index: 50; }
+  kbd { background: var(--surface); border: 1px solid var(--surface2); padding: 2px 8px; border-radius: 4px; font-family: monospace; font-size: 0.9em; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 0.85em; font-weight: 600; }
+  .memory-diagram { display: flex; gap: 40px; justify-content: center; margin: 20px 0; }
+  .mem-box { background: var(--surface); border: 2px solid var(--surface2); border-radius: 10px; padding: 16px 24px; text-align: center; min-width: 140px; }
+  .mem-box .label { color: var(--text-dim); font-size: 0.85em; margin-bottom: 8px; }
+  .mem-box .value { font-size: 1.4em; font-weight: 700; font-family: 'Cascadia Code', monospace; }
+  .mem-box.highlight { border-color: var(--accent); }
+  .mem-arrow { display: flex; align-items: center; color: var(--accent); font-size: 1.5em; }
+  .tag {
+    display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.85em;
+    font-weight: 600; margin: 2px;
+  }
+  .tag-blue { background: rgba(59,130,246,0.2); color: var(--accent); border: 1px solid rgba(59,130,246,0.4); }
+  .tag-green { background: rgba(34,197,94,0.2); color: var(--green); border: 1px solid rgba(34,197,94,0.4); }
+  .tag-orange { background: rgba(245,158,11,0.2); color: var(--orange); border: 1px solid rgba(245,158,11,0.4); }
+  .big-center { text-align: center; margin: 30px 0; }
+  .session-header { color: var(--text-dim); font-size: 1em; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+  @media (max-width: 900px) { .slide-container { padding: 20px 30px; } .columns { grid-template-columns: 1fr; gap: 20px; } h1 { font-size: 2em; } h2 { font-size: 1.6em; } }
+</style>
+</head>
+<body>
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- SLIDE 1: Title -->
+<div class="slide-container">
+<div class="slide active" data-slide="1">
+  <div class="session-header">Session 4 &middot; Block A: Foundations of C#</div>
+  <h1>Classes, Objects &amp; Access Modifiers</h1>
+  <p class="subtitle">From table definitions to objects that own their data and behavior</p>
+  <div class="columns" style="margin-top:48px">
+    <div>
+      <h3>What You'll Learn</h3>
+      <ul>
+        <li>Classes &mdash; like a table definition with behavior</li>
+        <li>Objects &mdash; like a row that can do things</li>
+        <li>Properties (<code>{ get; set; }</code>) and computed properties</li>
+        <li>Constructors &mdash; the INSERT rules</li>
+        <li>Access modifiers &mdash; the GRANT/DENY of C#</li>
+        <li><code>static</code> classes and members</li>
+      </ul>
+    </div>
+    <div>
+      <h3>The Exercise</h3>
+      <div class="highlight-box orange">
+        <p>Model real HSP database tables as C# classes: <code>BankAccount</code>, <code>CurrencyPair</code>, <code>CurrencyRate</code>.</p>
+        <br>
+        <p style="color:var(--text-dim)">Same entities. No SQL. Data and behavior together.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 2: The Mental Shift -->
+<div class="slide" data-slide="2">
+  <h2>The Big Mental Shift</h2>
+  <div class="flow" style="margin-bottom:30px">
+    <div class="flow-box sql">Table Definition</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-box">Class</div>
+    <div class="flow-arrow">&nbsp;&nbsp;&nbsp;</div>
+    <div class="flow-box sql">Row</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-box">Object</div>
+    <div class="flow-arrow">&nbsp;&nbsp;&nbsp;</div>
+    <div class="flow-box sql">Column</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-box">Property</div>
+  </div>
+  <table>
+    <tr><th>SQL</th><th>C#</th></tr>
+    <tr><td><code>CREATE TABLE</code> defines columns</td><td><code>class</code> defines properties + methods</td></tr>
+    <tr><td>A row holds data</td><td>An object holds data <strong>+ behavior</strong></td></tr>
+    <tr><td>Procedures operate on tables (separate)</td><td>Methods live <strong>inside</strong> the class</td></tr>
+    <tr><td>Computed column</td><td>Computed property (<code>=&gt; expr</code>)</td></tr>
+    <tr><td>Constraints (NOT NULL, DEFAULT, CHECK)</td><td>Constructors + validation</td></tr>
+  </table>
+  <div class="highlight-box green" style="margin-top:12px">
+    <p><strong>Key insight:</strong> In SQL, data and behavior are separate. In C#, they live together inside a class.</p>
+  </div>
+</div>
+
+<!-- SLIDE 3: Table to Class -->
+<div class="slide" data-slide="3">
+  <h2>From Table to Class</h2>
+  <div class="columns">
+    <div>
+      <h3>SQL Table (hw.Accounts)</h3>
+      <pre><code><span class="kw">CREATE TABLE</span> <span class="nm">hw.Accounts</span> (
+    AccountID   <span class="tp">BIGINT IDENTITY</span> <span class="kw">PK</span>,
+    CustomerID  <span class="tp">INT</span>,
+    AccountNumber <span class="tp">VARCHAR</span>(<span class="num">30</span>),
+    CCY         <span class="tp">VARCHAR</span>(<span class="num">5</span>) <span class="kw">DEFAULT</span> <span class="str">'GEL'</span>,
+    Balance     <span class="tp">DECIMAL</span> <span class="kw">DEFAULT</span> <span class="num">0</span>,
+    BlockedAmount <span class="tp">DECIMAL</span> <span class="kw">DEFAULT</span> <span class="num">0</span>,
+    CreateTime  <span class="tp">DATETIME2</span> <span class="kw">DEFAULT</span> SYSDATETIME()
+);</code></pre>
+    </div>
+    <div>
+      <h3>C# Class</h3>
+      <pre><code><span class="kw">public class</span> <span class="tp">BankAccount</span>
+{
+    <span class="kw">public</span> <span class="tp">long</span> AccountId { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public</span> <span class="tp">int</span>? CustomerId { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public</span> <span class="tp">string</span>? AccountNumber { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public</span> <span class="tp">string</span> CCY { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="str">"GEL"</span>;
+    <span class="kw">public</span> <span class="tp">decimal</span> Balance { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="num">0m</span>;
+    <span class="kw">public</span> <span class="tp">decimal</span> BlockedAmount { <span class="kw">get</span>; <span class="kw">set</span>; } = <span class="num">0m</span>;
+    <span class="kw">public</span> <span class="tp">DateTime</span> CreateTime { <span class="kw">get</span>; <span class="kw">set</span>; }
+        = DateTime.Now;
+}</code></pre>
+    </div>
+  </div>
+  <div class="analogy">A class is <code>CREATE TABLE</code>. An object is a row. Properties are columns. Default values map directly.</div>
+</div>
+
+<!-- SLIDE 4: Creating Objects -->
+<div class="slide" data-slide="4">
+  <h2>Creating Objects &mdash; Like INSERT</h2>
+  <div class="columns">
+    <div>
+      <h3>SQL INSERT</h3>
+      <pre><code><span class="kw">INSERT INTO</span> <span class="nm">hw.Accounts</span>
+    (CustomerID, AccountNumber, CCY)
+<span class="kw">VALUES</span>
+    (<span class="num">42</span>, <span class="str">'AC01GEL000000001'</span>, <span class="str">'GEL'</span>);
+<span class="cm">-- Balance, BlockedAmount get defaults</span></code></pre>
+    </div>
+    <div>
+      <h3>C# Object Initializer</h3>
+      <pre><code><span class="kw">var</span> account = <span class="kw">new</span> <span class="tp">BankAccount</span>
+{
+    CustomerId = <span class="num">42</span>,
+    AccountNumber = <span class="str">"AC01GEL000000001"</span>,
+    CCY = <span class="str">"GEL"</span>
+};
+<span class="cm">// Balance, BlockedAmount get defaults</span></code></pre>
+    </div>
+  </div>
+  <div class="highlight-box" style="margin-top:16px">
+    <p><code>new</code> is like <code>INSERT</code> &mdash; it creates a new instance. Properties you don't set keep their default values, just like columns with <code>DEFAULT</code>.</p>
+  </div>
+</div>
+
+<!-- SLIDE 5: Data + Behavior -->
+<div class="slide" data-slide="5">
+  <h2>Data + Behavior Together</h2>
+  <p style="margin-bottom:16px">In SQL, the function is <strong>separate</strong> from the table. In C#, the method lives <strong>inside</strong> the class:</p>
+  <div class="columns">
+    <div>
+      <h3>SQL &mdash; Separate</h3>
+      <pre style="font-size:0.85em"><code><span class="cm">-- Table holds data</span>
+<span class="kw">CREATE TABLE</span> <span class="nm">hw.Accounts</span> (
+    Balance <span class="tp">DECIMAL</span>,
+    BlockedAmount <span class="tp">DECIMAL</span>
+);
+
+<span class="cm">-- Function operates on it externally</span>
+<span class="kw">CREATE FUNCTION</span>
+    <span class="nm">hp.fnGetAvailableBalance</span>
+    (<span class="nm">@AccountID</span> <span class="tp">BIGINT</span>)
+<span class="kw">RETURNS DECIMAL AS BEGIN</span>
+    <span class="kw">SELECT</span> Balance - BlockedAmount
+    <span class="kw">FROM</span> hw.Accounts
+    <span class="kw">WHERE</span> AccountID = <span class="nm">@AccountID</span>;
+<span class="kw">END</span></code></pre>
+    </div>
+    <div>
+      <h3>C# &mdash; Together</h3>
+      <pre style="font-size:0.85em"><code><span class="kw">public class</span> <span class="tp">BankAccount</span>
+{
+    <span class="cm">// Data</span>
+    <span class="kw">public</span> <span class="tp">decimal</span> Balance { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public</span> <span class="tp">decimal</span> BlockedAmount { <span class="kw">get</span>; <span class="kw">set</span>; }
+
+    <span class="cm">// Behavior — uses its own data</span>
+    <span class="kw">public</span> <span class="tp">decimal</span> GetAvailableBalance()
+    {
+        <span class="kw">return</span> Balance - BlockedAmount;
+    }
+}
+
+<span class="cm">// No query needed — the object HAS the data</span>
+<span class="kw">var</span> acct = <span class="kw">new</span> <span class="tp">BankAccount</span>
+    { Balance = <span class="num">1000m</span>, BlockedAmount = <span class="num">200m</span> };
+acct.GetAvailableBalance(); <span class="cm">// 800m</span></code></pre>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 6: Properties -->
+<div class="slide" data-slide="6">
+  <h2>Properties &mdash; Columns With Superpowers</h2>
+  <table>
+    <tr><th>SQL Column Feature</th><th>C# Property Equivalent</th></tr>
+    <tr><td>Regular column</td><td><code>public string Name { get; set; }</code></td></tr>
+    <tr><td>Column with DEFAULT</td><td><code>public string CCY { get; set; } = "GEL";</code></td></tr>
+    <tr><td>IDENTITY column</td><td><code>public long Id { get; }</code> (set only in constructor)</td></tr>
+    <tr><td>Computed column (<code>AS expr</code>)</td><td><code>public string Code =&gt; $"{Base}/{Quote}";</code></td></tr>
+    <tr><td>CHECK constraint</td><td>Validation in setter or constructor</td></tr>
+    <tr><td>SELECT allowed, UPDATE denied</td><td><code>public decimal Balance { get; private set; }</code></td></tr>
+  </table>
+  <div class="analogy">Properties are columns that can also validate, compute, and control who can read/write.</div>
+</div>
+
+<!-- SLIDE 7: Computed Properties -->
+<div class="slide" data-slide="7">
+  <h2>Computed Properties &mdash; Computed Columns</h2>
+  <p>The <code>hp.CurrencyPairs</code> table has computed columns. In C#, use <code>=&gt;</code> properties:</p>
+  <div class="columns">
+    <div>
+      <h3>SQL Computed Column</h3>
+      <pre><code><span class="kw">CREATE TABLE</span> hp.CurrencyPairs (
+    BaseCurrency  <span class="tp">VARCHAR</span>(<span class="num">3</span>),
+    QuoteCurrency <span class="tp">VARCHAR</span>(<span class="num">3</span>),
+
+    PairCode <span class="kw">AS</span>
+      (BaseCurrency + <span class="str">'/'</span>
+       + QuoteCurrency),
+
+    NormalizedKey <span class="kw">AS</span>
+      (<span class="kw">UPPER</span>(BaseCurrency) + <span class="str">'/'</span>
+       + <span class="kw">UPPER</span>(QuoteCurrency))
+);</code></pre>
+    </div>
+    <div>
+      <h3>C# Computed Property</h3>
+      <pre><code><span class="kw">public class</span> <span class="tp">CurrencyPair</span>
+{
+    <span class="kw">public</span> <span class="tp">string</span> BaseCurrency { <span class="kw">get</span>; <span class="kw">set</span>; }
+    <span class="kw">public</span> <span class="tp">string</span> QuoteCurrency { <span class="kw">get</span>; <span class="kw">set</span>; }
+
+    <span class="kw">public</span> <span class="tp">string</span> PairCode
+        => <span class="nm">$</span><span class="str">"{BaseCurrency}/{QuoteCurrency}"</span>;
+
+    <span class="kw">public</span> <span class="tp">string</span> NormalizedKey
+        => PairCode.ToUpper();
+}</code></pre>
+    </div>
+  </div>
+  <div class="highlight-box green">
+    <p>Computed properties are recalculated every time you access them &mdash; always up to date, just like SQL computed columns.</p>
+  </div>
+</div>
+
+<!-- SLIDE 8: private set -->
+<div class="slide" data-slide="8">
+  <h2>Encapsulation &mdash; <code>private set</code></h2>
+  <p>Control who can modify a property. <strong>Read: everyone. Write: only the class.</strong></p>
+  <pre><code><span class="kw">public class</span> <span class="tp">BankAccount</span>
+{
+    <span class="kw">public</span> <span class="tp">decimal</span> Balance { <span class="kw">get</span>; <span class="kw">private set</span>; } = <span class="num">0m</span>;
+
+    <span class="kw">public void</span> Deposit(<span class="tp">decimal</span> amount)
+    {
+        <span class="kw">if</span> (amount <= <span class="num">0</span>) <span class="kw">throw new</span> <span class="tp">ArgumentException</span>(<span class="str">"Must be positive."</span>);
+        Balance += amount;      <span class="cm">// OK — we're inside the class</span>
+    }
+}
+
+<span class="kw">var</span> acct = <span class="kw">new</span> <span class="tp">BankAccount</span>();
+acct.Deposit(<span class="num">500m</span>);                 <span class="cm">// OK — uses the method</span>
+Console.WriteLine(acct.Balance);    <span class="cm">// OK — can read (500)</span>
+acct.Balance = <span class="num">1000m</span>;               <span class="cm">// COMPILER ERROR — can't write!</span></code></pre>
+  <div class="analogy">Like a column you can SELECT but can only UPDATE through a stored procedure &mdash; controlled modification.</div>
+</div>
+
+<!-- SLIDE 9: Constructors -->
+<div class="slide" data-slide="9">
+  <h2>Constructors &mdash; The INSERT Rules</h2>
+  <p>A <strong>constructor</strong> runs when you create a new object. It enforces what data is required:</p>
+  <pre><code><span class="kw">public class</span> <span class="tp">CurrencyCode</span>
+{
+    <span class="kw">public</span> <span class="tp">string</span> Code { <span class="kw">get</span>; }           <span class="cm">// get-only = immutable after construction</span>
+    <span class="kw">public</span> <span class="tp">string</span> NumericCode { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="tp">int</span> Scale { <span class="kw">get</span>; }
+
+    <span class="cm">// Constructor — like NOT NULL columns: you MUST provide these values</span>
+    <span class="kw">public</span> CurrencyCode(<span class="tp">string</span> code, <span class="tp">string</span> numericCode, <span class="tp">int</span> scale)
+    {
+        <span class="kw">if</span> (<span class="tp">string</span>.IsNullOrWhiteSpace(code) || code.Length != <span class="num">3</span>)
+            <span class="kw">throw new</span> <span class="tp">ArgumentException</span>(<span class="str">"Code must be 3 characters."</span>);
+        Code = code.ToUpper();
+        NumericCode = numericCode;
+        Scale = scale;
+    }
+}
+
+<span class="kw">var</span> gel = <span class="kw">new</span> <span class="tp">CurrencyCode</span>(<span class="str">"GEL"</span>, <span class="str">"981"</span>, <span class="num">2</span>);   <span class="cm">// OK</span>
+<span class="kw">var</span> bad = <span class="kw">new</span> <span class="tp">CurrencyCode</span>(<span class="str">""</span>, <span class="str">"000"</span>, <span class="num">2</span>);      <span class="cm">// THROWS — validation!</span>
+<span class="kw">var</span> nope = <span class="kw">new</span> <span class="tp">CurrencyCode</span>();                    <span class="cm">// COMPILER ERROR — no parameterless constructor</span></code></pre>
+  <div class="analogy">A constructor with required parameters = NOT NULL columns with no DEFAULT. You must provide values at INSERT time.</div>
+</div>
+
+<!-- SLIDE 10: Constructor with defaults -->
+<div class="slide" data-slide="10">
+  <h2>Constructor Defaults &amp; Chaining</h2>
+  <h3>Optional Parameters (Like Column Defaults)</h3>
+  <pre><code><span class="kw">public</span> BankAccount(<span class="tp">long</span> accountId, <span class="tp">int</span> customerId,
+                   <span class="tp">string</span> ccy = <span class="str">"GEL"</span>, <span class="tp">decimal</span> initialBalance = <span class="num">0m</span>)
+{
+    AccountId = accountId;  CustomerId = customerId;
+    CCY = ccy;  Balance = initialBalance;
+}
+
+<span class="kw">var</span> a = <span class="kw">new</span> <span class="tp">BankAccount</span>(<span class="num">1</span>, <span class="num">42</span>);                    <span class="cm">// GEL, 0m</span>
+<span class="kw">var</span> b = <span class="kw">new</span> <span class="tp">BankAccount</span>(<span class="num">2</span>, <span class="num">42</span>, <span class="str">"USD"</span>);              <span class="cm">// USD, 0m</span>
+<span class="kw">var</span> c = <span class="kw">new</span> <span class="tp">BankAccount</span>(<span class="num">3</span>, <span class="num">42</span>, <span class="str">"EUR"</span>, <span class="num">1000m</span>);     <span class="cm">// EUR, 1000m</span></code></pre>
+  <h3 style="margin-top:20px">Constructor Chaining (<code>: this(...)</code>)</h3>
+  <pre><code><span class="cm">// Full constructor</span>
+<span class="kw">public</span> BankAccount(<span class="tp">long</span> id, <span class="tp">int</span> custId, <span class="tp">string</span> ccy, <span class="tp">decimal</span> balance)
+{
+    AccountId = id; CustomerId = custId; CCY = ccy; Balance = balance;
+}
+
+<span class="cm">// Simplified — chains to the full one</span>
+<span class="kw">public</span> BankAccount(<span class="tp">long</span> id, <span class="tp">int</span> custId)
+    : <span class="kw">this</span>(id, custId, <span class="str">"GEL"</span>, <span class="num">0m</span>) { }   <span class="cm">// delegates to full constructor</span></code></pre>
+</div>
+
+<!-- SLIDE 11: Quiz - Classes -->
+<div class="slide" data-slide="11">
+  <h2>Quick Check</h2>
+  <p style="font-size:1.2em; margin-bottom:24px">In SQL, data (tables) and behavior (stored procedures) are separate. In C#, where does behavior live?</p>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'q1')">A. In a separate static file</div>
+  <div class="quiz-option" onclick="checkQuiz(this, true, 'q1')">B. Inside the class, as methods alongside properties</div>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'q1')">C. In a stored procedure equivalent called a "handler"</div>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'q1')">D. In a global functions file</div>
+  <div class="quiz-feedback correct" id="q1-correct">
+    &#10003; Correct! This is the fundamental OOP shift: data and behavior live together inside a class. The object knows how to operate on its own data.
+  </div>
+  <div class="quiz-feedback wrong" id="q1-wrong">
+    &#10007; Not quite. In OOP, methods (behavior) live <strong>inside</strong> the class, right next to the properties (data). This is the key difference from SQL's approach.
+  </div>
+</div>
+
+<!-- SLIDE 12: Access Modifiers -->
+<div class="slide" data-slide="12">
+  <h2>Access Modifiers &mdash; GRANT/DENY for C#</h2>
+  <table>
+    <tr><th>C#</th><th>SQL Analogy</th><th>Who Can See It</th></tr>
+    <tr><td><code>public</code></td><td><code>GRANT EXECUTE TO PUBLIC</code></td><td>Any code, anywhere</td></tr>
+    <tr><td><code>private</code></td><td>No GRANT (owner only)</td><td>Only inside this class</td></tr>
+    <tr><td><code>protected</code></td><td>GRANT to schema family</td><td>This class + subclasses</td></tr>
+    <tr><td><code>internal</code></td><td>GRANT to database only</td><td>This project/assembly</td></tr>
+  </table>
+  <pre style="margin-top:16px"><code><span class="kw">public class</span> <span class="tp">BankAccount</span>
+{
+    <span class="kw">public</span>  <span class="tp">decimal</span> Balance { <span class="kw">get</span>; <span class="kw">private set</span>; }   <span class="cm">// read: public, write: private</span>
+    <span class="kw">private</span> <span class="tp">decimal</span> _overdraftLimit = <span class="num">0m</span>;             <span class="cm">// only this class sees this</span>
+
+    <span class="kw">public bool</span> Withdraw(<span class="tp">decimal</span> amount)              <span class="cm">// public interface</span>
+    {
+        <span class="kw">if</span> (!CanWithdraw(amount)) <span class="kw">return false</span>;       <span class="cm">// calls private method</span>
+        Balance -= amount;
+        <span class="kw">return true</span>;
+    }
+
+    <span class="kw">private bool</span> CanWithdraw(<span class="tp">decimal</span> amount)           <span class="cm">// hidden from outside</span>
+        => amount > <span class="num">0</span> && amount <= Balance + _overdraftLimit;
+}</code></pre>
+</div>
+
+<!-- SLIDE 13: Encapsulation visual -->
+<div class="slide" data-slide="13">
+  <h2>Encapsulation in Practice</h2>
+  <p>Think of a class like a stored procedure: callers see a simple interface, complexity is hidden inside.</p>
+  <div class="columns">
+    <div style="text-align:center">
+      <h3>What Outside Code Sees</h3>
+      <div style="background:var(--surface); border:2px solid var(--green); border-radius:16px; padding:24px; margin:12px 0;">
+        <p style="color:var(--green); font-weight:600; margin-bottom:12px">PUBLIC</p>
+        <code>Balance</code> (read-only)<br>
+        <code>AvailableBalance</code> (read-only)<br>
+        <code>Deposit(amount)</code><br>
+        <code>Withdraw(amount)</code><br>
+        <code>BlockAmount(amount)</code>
+      </div>
+    </div>
+    <div style="text-align:center">
+      <h3>Hidden Inside the Class</h3>
+      <div style="background:var(--surface); border:2px solid var(--red); border-radius:16px; padding:24px; margin:12px 0;">
+        <p style="color:var(--red); font-weight:600; margin-bottom:12px">PRIVATE</p>
+        <code>_overdraftLimit</code><br>
+        <code>CanWithdraw(amount)</code><br>
+        <code>ValidatePositiveAmount()</code><br>
+        <code>Balance</code> setter<br>
+        <code>BlockedAmount</code> setter
+      </div>
+    </div>
+  </div>
+  <div class="highlight-box" style="margin-top:12px">
+    <p><strong>Rule of thumb:</strong> Start with everything <code>private</code>. Only make things <code>public</code> when another class genuinely needs access.</p>
+  </div>
+</div>
+
+<!-- SLIDE 14: static -->
+<div class="slide" data-slide="14">
+  <h2><code>static</code> &mdash; Functions Without a Row</h2>
+  <p>Some SQL functions don't need a table row. C#'s <code>static</code> is the same idea:</p>
+  <div class="columns">
+    <div>
+      <h3>SQL Scalar Functions</h3>
+      <pre><code><span class="cm">-- Standalone utilities</span>
+<span class="kw">SELECT</span> <span class="nm">dbo.iban_mod97</span>(<span class="str">'1614001821'</span>);
+
+<span class="kw">SELECT</span> <span class="nm">hp.fnCalcFeeAmount</span>(
+    <span class="num">1000</span>, <span class="num">5</span>, <span class="num">1.0</span>, <span class="num">0</span>, <span class="num">100</span>);
+
+<span class="cm">-- No table row needed</span></code></pre>
+    </div>
+    <div>
+      <h3>C# Static Methods</h3>
+      <pre><code><span class="cm">// Call on the CLASS, not an object</span>
+<span class="tp">int</span> r = <span class="tp">IbanValidator</span>.Mod97(<span class="str">"1614001821"</span>);
+
+<span class="tp">decimal</span> fee = <span class="tp">FeeCalculator</span>.CalcFeeAmount(
+    <span class="num">1000m</span>, <span class="num">5m</span>, <span class="num">1.0m</span>, <span class="num">0m</span>, <span class="num">100m</span>);
+
+<span class="cm">// No object needed</span></code></pre>
+    </div>
+  </div>
+  <div class="analogy">A static method is like a scalar function: <code>dbo.iban_mod97()</code> &rarr; <code>IbanValidator.Mod97()</code>. The schema is the class name.</div>
+</div>
+
+<!-- SLIDE 15: static class -->
+<div class="slide" data-slide="15">
+  <h2>Static Classes &mdash; Schema of Functions</h2>
+  <pre><code><span class="kw">public static class</span> <span class="tp">FeeCalculator</span>
+{
+    <span class="kw">public static</span> <span class="tp">decimal</span> CalcFeeAmount(
+        <span class="tp">decimal</span> amount, <span class="tp">decimal</span> fixedFee, <span class="tp">decimal</span> percent,
+        <span class="tp">decimal</span> min, <span class="tp">decimal</span> max)
+    {
+        <span class="tp">decimal</span> fee = fixedFee > <span class="num">0</span> ? fixedFee : amount * percent / <span class="num">100m</span>;
+        <span class="kw">return</span> Math.Max(min, Math.Min(max, fee));
+    }
+
+    <span class="kw">public static</span> <span class="tp">decimal</span> CalcVat(<span class="tp">decimal</span> amount) => amount * <span class="num">0.18m</span>;
+}</code></pre>
+  <div class="columns" style="margin-top:20px">
+    <div>
+      <h3>When to Use Static</h3>
+      <ul>
+        <li>Pure calculations (no state)</li>
+        <li>Utility/helper methods</li>
+        <li>Constants and configuration</li>
+      </ul>
+    </div>
+    <div>
+      <h3>When to Use Regular Classes</h3>
+      <ul>
+        <li>Object holds data (properties)</li>
+        <li>Behavior depends on object state</li>
+        <li>Need multiple instances</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 16: Namespaces -->
+<div class="slide" data-slide="16">
+  <h2>Namespaces &mdash; Schema Qualification</h2>
+  <div class="columns">
+    <div>
+      <h3>SQL Schemas</h3>
+      <pre><code><span class="nm">hp</span>.fnGenerateAccountNumber
+<span class="nm">hw</span>.Accounts
+<span class="nm">dbo</span>.iban_mod97
+<span class="nm">hp</span>.CurrencyRates</code></pre>
+    </div>
+    <div>
+      <h3>C# Namespaces</h3>
+      <pre><code><span class="kw">namespace</span> Banking.Core;
+<span class="kw">namespace</span> Banking.Currency;
+<span class="kw">namespace</span> Banking.Validation;</code></pre>
+    </div>
+  </div>
+  <pre style="margin-top:16px"><code><span class="cm">// Without using — fully qualified (like hp.fnGenerateAccountNumber)</span>
+Banking.Core.<span class="tp">BankAccount</span> acct = <span class="kw">new</span> Banking.Core.<span class="tp">BankAccount</span>();
+
+<span class="cm">// With using — like setting a default schema</span>
+<span class="kw">using</span> Banking.Core;
+<span class="tp">BankAccount</span> acct = <span class="kw">new</span> <span class="tp">BankAccount</span>();   <span class="cm">// clean!</span></code></pre>
+  <div class="analogy"><code>using Banking.Core;</code> is like <code>ALTER USER SET DEFAULT_SCHEMA = hp;</code> &mdash; now you don't need to type the schema prefix.</div>
+</div>
+
+<!-- SLIDE 17: Quiz - access modifiers -->
+<div class="slide" data-slide="17">
+  <h2>Quick Check</h2>
+  <p style="font-size:1.2em; margin-bottom:24px">You want Balance to be readable by any code but only modifiable through <code>Deposit()</code> and <code>Withdraw()</code> methods. Which declaration?</p>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'q2')">A. <code>public decimal Balance { get; set; }</code></div>
+  <div class="quiz-option" onclick="checkQuiz(this, true, 'q2')">B. <code>public decimal Balance { get; private set; }</code></div>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'q2')">C. <code>private decimal Balance { get; set; }</code></div>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'q2')">D. <code>public decimal Balance { private get; set; }</code></div>
+  <div class="quiz-feedback correct" id="q2-correct">
+    &#10003; Correct! <code>{ get; private set; }</code> means anyone can read, but only the class itself (its methods) can write. External code must go through <code>Deposit()</code>/<code>Withdraw()</code>.
+  </div>
+  <div class="quiz-feedback wrong" id="q2-wrong">
+    &#10007; Not quite. <code>{ get; private set; }</code> gives public read access and private write access &mdash; exactly what we need for controlled modification through methods.
+  </div>
+</div>
+
+<!-- SLIDE 18: Reference types -->
+<div class="slide" data-slide="18">
+  <h2>Reference Types &mdash; Two Variables, One Object</h2>
+  <p>Objects are <strong>reference types</strong>. A variable holds a pointer, not the data itself:</p>
+  <pre><code><span class="tp">BankAccount</span> a = <span class="kw">new</span> <span class="tp">BankAccount</span> { Balance = <span class="num">1000m</span> };
+<span class="tp">BankAccount</span> b = a;       <span class="cm">// b points to the SAME object!</span>
+
+b.Balance = <span class="num">2000m</span>;
+Console.WriteLine(a.Balance);  <span class="cm">// 2000m &mdash; both see the change!</span></code></pre>
+  <div class="memory-diagram">
+    <div class="mem-box highlight">
+      <div class="label">Variable <code>a</code></div>
+      <div class="value" style="font-size:0.9em">&rarr; ref</div>
+    </div>
+    <div class="mem-arrow">&rarr;</div>
+    <div class="mem-box" style="border-color:var(--green)">
+      <div class="label">Object in Memory</div>
+      <div class="value">2000m</div>
+    </div>
+    <div class="mem-arrow">&larr;</div>
+    <div class="mem-box highlight">
+      <div class="label">Variable <code>b</code></div>
+      <div class="value" style="font-size:0.9em">&rarr; ref</div>
+    </div>
+  </div>
+  <div class="highlight-box orange">
+    <p><strong>No SQL equivalent.</strong> In SQL, every <code>SELECT</code> returns a copy of the data. In C#, two variables can point to the same object. If you need a copy, create a <code>new</code> object explicitly.</p>
+  </div>
+</div>
+
+<!-- SLIDE 19: Quiz - reference types -->
+<div class="slide" data-slide="19">
+  <h2>Quick Check</h2>
+  <p style="font-size:1.1em; margin-bottom:16px">What does this code print?</p>
+  <pre><code><span class="tp">BankAccount</span> x = <span class="kw">new</span> <span class="tp">BankAccount</span> { Balance = <span class="num">500m</span> };
+<span class="tp">BankAccount</span> y = x;
+y.Balance = <span class="num">0m</span>;
+Console.WriteLine(x.Balance);</code></pre>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'q3')">A. <code>500</code></div>
+  <div class="quiz-option" onclick="checkQuiz(this, true, 'q3')">B. <code>0</code></div>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'q3')">C. Compiler error</div>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'q3')">D. NullReferenceException</div>
+  <div class="quiz-feedback correct" id="q3-correct">
+    &#10003; Correct! <code>y = x</code> copies the <strong>reference</strong>, not the object. Both <code>x</code> and <code>y</code> point to the same object, so changing it through <code>y</code> is visible through <code>x</code>.
+  </div>
+  <div class="quiz-feedback wrong" id="q3-wrong">
+    &#10007; The answer is <code>0</code>. Since <code>y = x</code> copies the reference (not the data), both variables point to the same object. Changing Balance through <code>y</code> changes it for <code>x</code> too.
+  </div>
+</div>
+
+<!-- SLIDE 20: Full example -->
+<div class="slide" data-slide="20">
+  <h2>Putting It All Together</h2>
+  <pre style="font-size:0.82em"><code><span class="kw">public class</span> <span class="tp">BankAccount</span>
+{
+    <span class="kw">public</span> <span class="tp">long</span> AccountId { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="tp">string</span> AccountNumber { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="tp">string</span> CCY { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="tp">decimal</span> Balance { <span class="kw">get</span>; <span class="kw">private set</span>; } = <span class="num">0m</span>;
+    <span class="kw">public</span> <span class="tp">decimal</span> BlockedAmount { <span class="kw">get</span>; <span class="kw">private set</span>; } = <span class="num">0m</span>;
+    <span class="kw">public</span> <span class="tp">decimal</span> AvailableBalance => Balance - BlockedAmount;  <span class="cm">// computed</span>
+
+    <span class="kw">public</span> BankAccount(<span class="tp">long</span> id, <span class="tp">string</span> accNum, <span class="tp">string</span> ccy = <span class="str">"GEL"</span>)
+    {
+        <span class="kw">if</span> (<span class="tp">string</span>.IsNullOrEmpty(accNum)) <span class="kw">throw new</span> <span class="tp">ArgumentException</span>(<span class="str">"Required."</span>);
+        AccountId = id; AccountNumber = accNum; CCY = ccy;
+    }
+
+    <span class="kw">public void</span> Deposit(<span class="tp">decimal</span> amount) { Validate(amount); Balance += amount; }
+    <span class="kw">public bool</span> Withdraw(<span class="tp">decimal</span> amount)
+    {
+        Validate(amount);
+        <span class="kw">if</span> (amount > AvailableBalance) <span class="kw">return false</span>;
+        Balance -= amount; <span class="kw">return true</span>;
+    }
+
+    <span class="kw">private void</span> Validate(<span class="tp">decimal</span> amount)  <span class="cm">// hidden helper</span>
+    {
+        <span class="kw">if</span> (amount <= <span class="num">0</span>) <span class="kw">throw new</span> <span class="tp">ArgumentException</span>(<span class="str">"Must be positive."</span>);
+    }
+}</code></pre>
+</div>
+
+<!-- SLIDE 21: Live demo -->
+<div class="slide" data-slide="21">
+  <h2>Live Demo &mdash; BankAccount in Action</h2>
+  <pre><code><span class="kw">var</span> account = <span class="kw">new</span> <span class="tp">BankAccount</span>(<span class="num">1</span>, <span class="str">"AC01GEL00000000012345"</span>);
+
+account.Deposit(<span class="num">1000m</span>);
+Console.WriteLine(account.Balance);             <span class="cm">// 1000</span>
+
+account.Deposit(<span class="num">500m</span>);
+Console.WriteLine(account.Balance);             <span class="cm">// 1500</span>
+
+<span class="kw">bool</span> ok = account.Withdraw(<span class="num">200m</span>);
+Console.WriteLine(<span class="nm">$</span><span class="str">"{ok}, Balance: {account.Balance}"</span>);  <span class="cm">// True, 1300</span>
+
+<span class="kw">bool</span> fail = account.Withdraw(<span class="num">5000m</span>);
+Console.WriteLine(<span class="nm">$</span><span class="str">"{fail}, Balance: {account.Balance}"</span>); <span class="cm">// False, 1300</span></code></pre>
+  <div class="code-runner">
+    <div class="code-runner-header">
+      <span>Expected outputs</span>
+      <button class="run-btn" onclick="simulateRun(this,'demo1')">&#9654; Run</button>
+    </div>
+    <div class="code-output" id="demo1">
+ account.Balance          → 1000.00
+ account.Balance          → 1500.00
+ Withdraw(200)            → True, Balance: 1300.00
+ Withdraw(5000)           → False, Balance: 1300.00
+ account.AvailableBalance → 1300.00</div>
+  </div>
+</div>
+
+<!-- SLIDE 22: Exercise intro -->
+<div class="slide" data-slide="22">
+  <h2>Today's Exercise</h2>
+  <p class="subtitle">Model real HSP database entities as C# classes</p>
+  <div style="margin-top:20px">
+    <div class="highlight-box orange">
+      <h3>The Tables</h3>
+      <p><code>hw.CurrencyCodes3</code>, <code>hp.CurrencyPairs</code>, <code>hp.CurrencyRates</code>, <code>hw.Accounts</code></p>
+    </div>
+    <div style="margin-top:16px">
+      <h3>Your Classes (6 exercises)</h3>
+      <ul>
+        <li>Exercise 1: <code>CurrencyCode</code> &mdash; immutable class, constructor validation</li>
+        <li>Exercise 2: <code>CurrencyPair</code> &mdash; computed properties, Invert() method</li>
+        <li>Exercise 3: <code>CurrencyRate</code> &mdash; constructor chaining, Convert()</li>
+        <li>Exercise 4: <code>BankAccount</code> &mdash; encapsulation, Deposit/Withdraw/Block</li>
+        <li>Exercise 5: <code>AccountNumberService</code> &mdash; static class refactor</li>
+        <li>Challenge: <code>CurrencyConverter</code> + <code>TransferService</code></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 23: Summary table -->
+<div class="slide" data-slide="23">
+  <h2>Session 4 &mdash; Complete Reference</h2>
+  <table style="font-size:0.95em">
+    <tr><th>SQL Concept</th><th>C# Equivalent</th><th>Session</th></tr>
+    <tr><td><code>CREATE TABLE</code></td><td><code>class</code> definition</td><td>4</td></tr>
+    <tr><td>A row</td><td>An object (<code>new ClassName()</code>)</td><td>4</td></tr>
+    <tr><td>Column</td><td>Property (<code>{ get; set; }</code>)</td><td>4</td></tr>
+    <tr><td>Computed column</td><td>Computed property (<code>=&gt; expr</code>)</td><td>4</td></tr>
+    <tr><td><code>DEFAULT</code> value</td><td>Property initializer (<code>= value</code>)</td><td>4</td></tr>
+    <tr><td><code>NOT NULL</code> / <code>CHECK</code></td><td>Constructor validation</td><td>4</td></tr>
+    <tr><td><code>IDENTITY</code></td><td><code>{ get; }</code> or <code>{ get; init; }</code></td><td>4</td></tr>
+    <tr><td><code>GRANT/DENY</code></td><td><code>public / private / protected</code></td><td>4</td></tr>
+    <tr><td>Scalar function</td><td><code>static</code> method</td><td>3, 4</td></tr>
+    <tr><td>Schema (<code>hp.</code>, <code>dbo.</code>)</td><td>Namespace + <code>using</code></td><td>4</td></tr>
+    <tr><td><code>INSERT ... VALUES</code></td><td><code>new ClassName { ... }</code></td><td>4</td></tr>
+  </table>
+</div>
+
+<!-- SLIDE 24: What's next -->
+<div class="slide" data-slide="24">
+  <h2>What's Next &mdash; Session 5</h2>
+  <div class="columns">
+    <div>
+      <h3>Session 5: Inheritance &amp; Interfaces</h3>
+      <ul>
+        <li>Inheritance &mdash; classes that extend other classes</li>
+        <li>Interfaces &mdash; contracts (like a procedure signature)</li>
+        <li><code>virtual</code>, <code>override</code>, <code>abstract</code></li>
+        <li>Polymorphism &mdash; the "interchangeable implementations" pattern</li>
+        <li>The four OOP pillars</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Homework</h3>
+      <div class="highlight-box">
+        <ul>
+          <li>Complete all 6 exercises in <code>04-hands-on-exercises.md</code></li>
+          <li>Ensure all tests pass with <code>dotnet test</code></li>
+          <li>Try the bonus TransferService exercise</li>
+          <li>Read: <em>C# 12 in a Nutshell</em> &mdash; Ch. 3 (Inheritance, Interfaces)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="big-center" style="margin-top:30px">
+    <span class="tag tag-green">Control Flow &#10003;</span>
+    <span class="tag tag-green">Loops &#10003;</span>
+    <span class="tag tag-green">Methods &#10003;</span>
+    <span class="tag tag-green">Classes &amp; Objects &#10003;</span>
+    <span class="tag tag-blue">Inheritance &amp; Interfaces &rarr; Next</span>
+  </div>
+</div>
+
+</div><!-- /slide-container -->
+
+<div class="nav">
+  <button id="prevBtn" onclick="navigate(-1)" disabled>&#8592;</button>
+  <span class="slide-counter" id="slideCounter">1 / 24</span>
+  <button id="nextBtn" onclick="navigate(1)">&#8594;</button>
+</div>
+<div class="keyboard-hints"><kbd>&#8592;</kbd> <kbd>&#8594;</kbd> Navigate &nbsp;&bull;&nbsp; <kbd>Space</kbd> Next &nbsp;&bull;&nbsp; <kbd>R</kbd> Reveal items</div>
+
+<script>
+  let currentSlide = 1;
+  const totalSlides = document.querySelectorAll('.slide').length;
+  function showSlide(n) {
+    document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+    const t = document.querySelector(`[data-slide="${n}"]`);
+    if (t) { t.classList.add('active'); currentSlide = n; updateUI(); revealItems(); }
+  }
+  function navigate(d) { const n = currentSlide + d; if (n >= 1 && n <= totalSlides) showSlide(n); }
+  function updateUI() {
+    document.getElementById('slideCounter').textContent = `${currentSlide} / ${totalSlides}`;
+    document.getElementById('prevBtn').disabled = currentSlide === 1;
+    document.getElementById('nextBtn').disabled = currentSlide === totalSlides;
+    document.getElementById('progressBar').style.width = `${(currentSlide / totalSlides) * 100}%`;
+  }
+  function revealItems() {
+    const items = document.querySelector('.slide.active').querySelectorAll('.reveal-item:not(.visible)');
+    items.forEach((item, i) => setTimeout(() => item.classList.add('visible'), 200 * (i + 1)));
+  }
+  function simulateRun(btn, id) {
+    btn.textContent = '\u23F3 Running...'; btn.disabled = true;
+    setTimeout(() => {
+      document.getElementById(id).classList.add('show');
+      btn.textContent = '\u2713 Done';
+      setTimeout(() => { btn.textContent = '\u25B6 Run'; btn.disabled = false; }, 2000);
+    }, 800);
+  }
+  function checkQuiz(el, correct, qid) {
+    const s = el.closest('.slide');
+    s.querySelectorAll('.quiz-option').forEach(o => { o.classList.remove('correct','wrong'); o.style.pointerEvents = 'none'; });
+    s.querySelectorAll('.quiz-feedback').forEach(f => f.classList.remove('show'));
+    el.classList.add(correct ? 'correct' : 'wrong');
+    document.getElementById(qid + (correct ? '-correct' : '-wrong')).classList.add('show');
+    setTimeout(() => s.querySelectorAll('.quiz-option').forEach(o => o.style.pointerEvents = 'auto'), 3000);
+  }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); navigate(1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); navigate(-1); }
+    if (e.key === 'r' || e.key === 'R') revealItems();
+    if (e.key === 'Home') showSlide(1);
+    if (e.key === 'End') showSlide(totalSlides);
+  });
+  let touchX = 0;
+  document.addEventListener('touchstart', e => touchX = e.touches[0].clientX);
+  document.addEventListener('touchend', e => { const d = touchX - e.changedTouches[0].clientX; if (Math.abs(d) > 50) navigate(d > 0 ? 1 : -1); });
+  updateUI(); revealItems();
+</script>
+</body>
+</html>
