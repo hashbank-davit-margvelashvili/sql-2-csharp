@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Session 5: Inheritance, Interfaces, and Polymorphism</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface2: #334155;
+    --accent: #3b82f6;
+    --accent2: #8b5cf6;
+    --text: #e2e8f0;
+    --text-dim: #94a3b8;
+    --green: #22c55e;
+    --orange: #f59e0b;
+    --red: #ef4444;
+    --cyan: #06b6d4;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg); color: var(--text); overflow: hidden; height: 100vh;
+  }
+  .progress-bar {
+    position: fixed; top: 0; left: 0; height: 4px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.4s ease; z-index: 100;
+  }
+  .slide-container {
+    width: 100vw; height: 100vh; display: flex;
+    align-items: center; justify-content: center; padding: 40px 80px;
+  }
+  .slide { display: none; width: 100%; max-width: 1100px; animation: fadeIn 0.4s ease; }
+  .slide.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+  h1 {
+    font-size: 2.8em; font-weight: 700; margin-bottom: 12px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  h2 { font-size: 2.2em; font-weight: 600; margin-bottom: 30px; }
+  h3 { font-size: 1.3em; font-weight: 600; margin-bottom: 16px; color: var(--accent); }
+  .subtitle { font-size: 1.3em; color: var(--text-dim); margin-bottom: 40px; }
+  p, li { font-size: 1.15em; line-height: 1.7; }
+  ul { list-style: none; padding: 0; }
+  ul li { padding: 8px 0 8px 28px; position: relative; }
+  ul li::before { content:'▸'; position:absolute; left:0; color:var(--accent); font-weight:bold; }
+  pre {
+    background: var(--surface); border: 1px solid var(--surface2); border-radius: 12px;
+    padding: 20px 24px; overflow-x: auto; margin: 16px 0; font-size: 0.95em;
+  }
+  code { font-family: 'Cascadia Code','Fira Code','Consolas', monospace; font-size: 0.95em; }
+  pre code { color: var(--text); }
+  .kw { color: var(--accent); } .str { color: var(--green); } .cm { color: var(--text-dim); font-style: italic; }
+  .tp { color: var(--cyan); } .nm { color: var(--orange); } .num { color: var(--orange); }
+  :not(pre) > code { background: var(--surface); padding: 3px 8px; border-radius: 6px; color: var(--cyan); }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 1.05em; }
+  th { background: var(--surface2); padding: 12px 16px; text-align: left; font-weight: 600; color: var(--accent); border-bottom: 2px solid var(--accent); }
+  td { padding: 10px 16px; border-bottom: 1px solid var(--surface2); }
+  tr:hover td { background: var(--surface); }
+  .columns { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
+  .columns3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; align-items: start; }
+  .highlight-box {
+    background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(139,92,246,0.1));
+    border: 1px solid rgba(59,130,246,0.3); border-radius: 12px; padding: 20px 24px; margin: 16px 0;
+  }
+  .highlight-box.green { background: linear-gradient(135deg, rgba(34,197,94,0.1), rgba(6,182,212,0.1)); border-color: rgba(34,197,94,0.3); }
+  .highlight-box.orange { background: linear-gradient(135deg, rgba(245,158,11,0.1), rgba(239,68,68,0.1)); border-color: rgba(245,158,11,0.3); }
+  .highlight-box.red { background: linear-gradient(135deg, rgba(239,68,68,0.1), rgba(245,158,11,0.1)); border-color: rgba(239,68,68,0.3); }
+  .analogy {
+    background: var(--surface); border-left: 4px solid var(--orange);
+    border-radius: 0 12px 12px 0; padding: 16px 20px; margin: 16px 0; font-size: 1.1em;
+  }
+  .analogy::before { content: '🔗 SQL Analogy: '; color: var(--orange); font-weight: 600; }
+  .step { display: flex; align-items: flex-start; gap: 16px; margin: 12px 0; }
+  .step-num {
+    flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%; background: var(--accent);
+    color: white; display: flex; align-items: center; justify-content: center; font-weight: 700;
+  }
+  .step-content { padding-top: 5px; }
+  .quiz-option {
+    background: var(--surface); border: 2px solid var(--surface2); border-radius: 10px;
+    padding: 14px 20px; margin: 8px 0; cursor: pointer; transition: all 0.2s; font-size: 1.05em;
+  }
+  .quiz-option:hover { border-color: var(--accent); background: var(--surface2); }
+  .quiz-option.correct { border-color: var(--green); background: rgba(34,197,94,0.15); }
+  .quiz-option.wrong { border-color: var(--red); background: rgba(239,68,68,0.1); }
+  .quiz-feedback { margin-top: 12px; padding: 12px 16px; border-radius: 8px; display: none; font-size: 1.05em; }
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.correct { background: rgba(34,197,94,0.15); color: var(--green); }
+  .quiz-feedback.wrong { background: rgba(239,68,68,0.1); color: var(--red); }
+  .code-runner { background: var(--surface); border: 1px solid var(--surface2); border-radius: 12px; overflow: hidden; margin: 16px 0; }
+  .code-runner-header { background: var(--surface2); padding: 8px 16px; display: flex; justify-content: space-between; align-items: center; font-size: 0.9em; color: var(--text-dim); }
+  .run-btn { background: var(--green); color: white; border: none; padding: 6px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.9em; transition: all 0.2s; }
+  .run-btn:hover { opacity: 0.85; transform: scale(1.02); }
+  .code-output { border-top: 1px solid var(--surface2); padding: 12px 16px; font-family: 'Cascadia Code', monospace; font-size: 0.9em; color: var(--green); display: none; white-space: pre-wrap; }
+  .code-output.show { display: block; }
+  .flow { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; margin: 20px 0; }
+  .flow-box { background: var(--surface); border: 2px solid var(--accent); border-radius: 10px; padding: 12px 20px; font-weight: 600; text-align: center; min-width: 120px; }
+  .flow-box.sql { border-color: var(--orange); }
+  .flow-arrow { color: var(--text-dim); font-size: 1.5em; font-weight: bold; }
+  .nav { position: fixed; bottom: 30px; right: 40px; display: flex; gap: 12px; align-items: center; z-index: 50; }
+  .nav button { background: var(--surface); border: 1px solid var(--surface2); color: var(--text); width: 48px; height: 48px; border-radius: 50%; cursor: pointer; font-size: 1.2em; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+  .nav button:hover { background: var(--accent); border-color: var(--accent); }
+  .nav button:disabled { opacity: 0.3; cursor: not-allowed; }
+  .slide-counter { color: var(--text-dim); font-size: 0.95em; min-width: 60px; text-align: center; }
+  .title-slide { text-align: center; }
+  .title-slide h1 { font-size: 3.2em; margin-bottom: 8px; }
+  .session-info { display: inline-flex; gap: 24px; margin-top: 40px; color: var(--text-dim); font-size: 1em; }
+  .session-info span { background: var(--surface); padding: 8px 20px; border-radius: 20px; border: 1px solid var(--surface2); }
+  .reveal-item { opacity: 0; transform: translateY(10px); transition: all 0.3s ease; }
+  .reveal-item.visible { opacity: 1; transform: translateY(0); }
+  .keyboard-hints { position: fixed; bottom: 30px; left: 40px; color: var(--text-dim); font-size: 0.85em; z-index: 50; }
+  kbd { background: var(--surface); border: 1px solid var(--surface2); padding: 2px 8px; border-radius: 4px; font-family: monospace; font-size: 0.9em; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 0.85em; font-weight: 600; }
+  .memory-diagram { display: flex; gap: 40px; justify-content: center; margin: 20px 0; }
+  .mem-box { background: var(--surface); border: 2px solid var(--surface2); border-radius: 10px; padding: 16px 24px; text-align: center; min-width: 140px; }
+  .mem-box .label { color: var(--text-dim); font-size: 0.85em; margin-bottom: 8px; }
+  .mem-box .value { font-size: 1.4em; font-weight: 700; font-family: 'Cascadia Code', monospace; }
+  .mem-box.highlight { border-color: var(--accent); }
+  .mem-arrow { display: flex; align-items: center; color: var(--accent); font-size: 1.5em; }
+  .tag {
+    display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.85em;
+    font-weight: 600; margin: 2px;
+  }
+  .tag-blue { background: rgba(59,130,246,0.2); color: var(--accent); border: 1px solid rgba(59,130,246,0.4); }
+  .tag-green { background: rgba(34,197,94,0.2); color: var(--green); border: 1px solid rgba(34,197,94,0.4); }
+  .tag-orange { background: rgba(245,158,11,0.2); color: var(--orange); border: 1px solid rgba(245,158,11,0.4); }
+  .big-center { text-align: center; margin: 30px 0; }
+  .session-header { color: var(--text-dim); font-size: 1em; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+  .hierarchy { display: flex; flex-direction: column; align-items: center; gap: 0; margin: 20px 0; }
+  .h-node { background: var(--surface); border: 2px solid var(--accent); border-radius: 10px; padding: 10px 24px; font-weight: 600; text-align: center; min-width: 180px; }
+  .h-node.abstract { border-color: var(--accent2); border-style: dashed; }
+  .h-node.interface { border-color: var(--cyan); border-style: dotted; }
+  .h-connector { width: 2px; height: 20px; background: var(--surface2); }
+  .h-branch { display: flex; gap: 20px; align-items: start; justify-content: center; }
+  .h-branch-arm { display: flex; flex-direction: column; align-items: center; }
+  .pillar-box { background: var(--surface); border: 2px solid var(--surface2); border-radius: 12px; padding: 20px; text-align: center; }
+  .pillar-box h3 { margin-bottom: 10px; }
+  .pillar-box.active { border-color: var(--green); }
+  @media (max-width: 900px) { .slide-container { padding: 20px 30px; } .columns { grid-template-columns: 1fr; gap: 20px; } h1 { font-size: 2em; } h2 { font-size: 1.6em; } }
+</style>
+</head>
+<body>
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- SLIDE 1: Title -->
+<div class="slide-container">
+<div class="slide active" data-slide="1">
+  <div class="session-header">Session 5 &middot; Block A: Foundations of C#</div>
+  <h1>Inheritance, Interfaces &amp; Polymorphism</h1>
+  <p class="subtitle">From repeated tables to reusable hierarchies &mdash; making objects interchangeable</p>
+  <div class="columns" style="margin-top:48px">
+    <div>
+      <h3>What You'll Learn</h3>
+      <ul>
+        <li>Inheritance &mdash; classes that extend other classes</li>
+        <li>Interfaces &mdash; contracts multiple classes can follow</li>
+        <li><code>virtual</code>, <code>override</code>, <code>abstract</code>, <code>sealed</code></li>
+        <li>Polymorphism &mdash; one call, many behaviors</li>
+        <li>The four OOP pillars</li>
+      </ul>
+    </div>
+    <div>
+      <h3>The Exercise</h3>
+      <div class="highlight-box orange">
+        <p>Build a <strong>transaction processing system</strong>: <code>Transaction</code> base class, derived types, and <code>ITransactionValidator</code> / <code>IFeeCalculator</code> interfaces.</p>
+        <br>
+        <p style="color:var(--text-dim)">Eliminate the IF/ELSE chains from HSP.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 2: Recap -->
+<div class="slide" data-slide="2">
+  <h2>Session 4 Recap</h2>
+  <div class="flow" style="margin-bottom:24px">
+    <div class="flow-box sql">Table</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-box">Class</div>
+    <div class="flow-arrow">&nbsp;&nbsp;</div>
+    <div class="flow-box sql">Row</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-box">Object</div>
+    <div class="flow-arrow">&nbsp;&nbsp;</div>
+    <div class="flow-box sql">GRANT/DENY</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-box">Access Modifiers</div>
+  </div>
+  <table>
+    <tr><th>You Learned</th><th>Key Idea</th></tr>
+    <tr><td>Classes &amp; Objects</td><td>Data + behavior together</td></tr>
+    <tr><td>Properties</td><td>Columns with superpowers (<code>{ get; set; }</code>)</td></tr>
+    <tr><td>Constructors</td><td>INSERT rules &amp; validation</td></tr>
+    <tr><td>Access modifiers</td><td><code>public</code> / <code>private</code> = GRANT / DENY</td></tr>
+    <tr><td><code>static</code></td><td>Functions that don't need a row</td></tr>
+  </table>
+  <div class="highlight-box green" style="margin-top:12px">
+    <p><strong>Today:</strong> What if multiple classes share common structure? What if different classes need to follow the same contract?</p>
+  </div>
+</div>
+
+<!-- SLIDE 3: The Problem -->
+<div class="slide" data-slide="3">
+  <h2>The Problem &mdash; Repeated Structure</h2>
+  <p>In HSP, many tables share the same columns:</p>
+  <pre style="font-size:0.85em"><code><span class="kw">CREATE TABLE</span> <span class="nm">hw.Accounts</span> (
+    AccountID <span class="tp">BIGINT</span>, CustomerID <span class="tp">INT</span>, CCY <span class="tp">VARCHAR</span>(<span class="num">5</span>),
+    Balance <span class="tp">DECIMAL</span>, AccountState <span class="tp">BIGINT</span>, CreateTime <span class="tp">DATETIME2</span>
+);
+<span class="kw">CREATE TABLE</span> <span class="nm">hw.Deposits</span> (
+    DepositID <span class="tp">BIGINT</span>, CustomerID <span class="tp">INT</span>, CCY <span class="tp">VARCHAR</span>(<span class="num">5</span>),
+    Balance <span class="tp">DECIMAL</span>, AccountState <span class="tp">BIGINT</span>, CreateTime <span class="tp">DATETIME2</span>,
+    InterestRate <span class="tp">DECIMAL</span>, MaturityDate <span class="tp">DATETIME2</span>   <span class="cm">-- extra</span>
+);
+<span class="kw">CREATE TABLE</span> <span class="nm">hw.Loans</span> (
+    LoanID <span class="tp">BIGINT</span>, CustomerID <span class="tp">INT</span>, CCY <span class="tp">VARCHAR</span>(<span class="num">5</span>),
+    Balance <span class="tp">DECIMAL</span>, AccountState <span class="tp">BIGINT</span>, CreateTime <span class="tp">DATETIME2</span>,
+    InterestRate <span class="tp">DECIMAL</span>, RemainingDebt <span class="tp">DECIMAL</span>     <span class="cm">-- extra</span>
+);</code></pre>
+  <div class="highlight-box red">
+    <p>6 columns are <strong>identical</strong> across all three tables. In SQL, you can't avoid this repetition. In C#, you can.</p>
+  </div>
+</div>
+
+<!-- SLIDE 4: Inheritance Basics -->
+<div class="slide" data-slide="4">
+  <h2>Inheritance &mdash; Extending a Base Class</h2>
+  <div class="columns">
+    <div>
+      <h3>The Base Class</h3>
+      <pre style="font-size:0.85em"><code><span class="kw">public class</span> <span class="tp">FinancialProduct</span>
+{
+    <span class="kw">public</span> <span class="tp">long</span> Id { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="tp">int</span> CustomerId { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="tp">string</span> CCY { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="tp">decimal</span> Balance { <span class="kw">get</span>; <span class="kw">protected set</span>; }
+    <span class="kw">public</span> <span class="tp">DateTime</span> CreateTime { <span class="kw">get</span>; }
+
+    <span class="kw">public</span> FinancialProduct(
+        <span class="tp">long</span> id, <span class="tp">int</span> custId, <span class="tp">string</span> ccy)
+    {
+        Id = id; CustomerId = custId;
+        CCY = ccy; CreateTime = DateTime.Now;
+    }
+}</code></pre>
+    </div>
+    <div>
+      <h3>Derived Classes</h3>
+      <pre style="font-size:0.85em"><code><span class="kw">public class</span> <span class="tp">DepositAccount</span>
+    : <span class="tp">FinancialProduct</span>
+{
+    <span class="kw">public</span> <span class="tp">decimal</span> InterestRate { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="tp">DateTime</span> MaturityDate { <span class="kw">get</span>; }
+
+    <span class="kw">public</span> DepositAccount(
+        <span class="tp">long</span> id, <span class="tp">int</span> custId, <span class="tp">string</span> ccy,
+        <span class="tp">decimal</span> rate, <span class="tp">DateTime</span> maturity)
+        : <span class="kw">base</span>(id, custId, ccy)
+    {
+        InterestRate = rate;
+        MaturityDate = maturity;
+    }
+}</code></pre>
+    </div>
+  </div>
+  <div class="analogy">Inheritance is like a view that extends a base table. The view inherits all columns and can add its own computed columns.</div>
+</div>
+
+<!-- SLIDE 5: base keyword -->
+<div class="slide" data-slide="5">
+  <h2><code>: base(...)</code> &mdash; Calling the Parent Constructor</h2>
+  <p>When creating a derived object, the <strong>parent constructor runs first</strong>:</p>
+  <pre><code><span class="kw">public class</span> <span class="tp">LoanAccount</span> : <span class="tp">FinancialProduct</span>
+{
+    <span class="kw">public</span> <span class="tp">decimal</span> InterestRate { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="tp">decimal</span> RemainingDebt { <span class="kw">get</span>; <span class="kw">private set</span>; }
+
+    <span class="kw">public</span> LoanAccount(<span class="tp">long</span> id, <span class="tp">int</span> custId, <span class="tp">string</span> ccy,
+                       <span class="tp">decimal</span> rate, <span class="tp">decimal</span> debt)
+        : <span class="kw">base</span>(id, custId, ccy)      <span class="cm">// Step 1: set up FinancialProduct</span>
+    {
+        InterestRate = rate;          <span class="cm">// Step 2: set up LoanAccount extras</span>
+        RemainingDebt = debt;
+    }
+}</code></pre>
+  <div class="highlight-box">
+    <p><code>base(id, custId, ccy)</code> calls the parent's constructor. It's like inserting into the base table first, then into the extension table.</p>
+  </div>
+</div>
+
+<!-- SLIDE 6: virtual / override -->
+<div class="slide" data-slide="6">
+  <h2><code>virtual</code> and <code>override</code></h2>
+  <p>A base class marks methods as <code>virtual</code> = "derived classes <strong>can change</strong> this behavior":</p>
+  <div class="columns">
+    <div>
+      <h3>Base &mdash; Default Behavior</h3>
+      <pre style="font-size:0.85em"><code><span class="kw">public class</span> <span class="tp">FinancialProduct</span>
+{
+    <span class="cm">// virtual = CAN be overridden</span>
+    <span class="kw">public virtual</span> <span class="tp">string</span> GetStatement()
+    {
+        <span class="kw">return</span> <span class="nm">$</span><span class="str">"Balance: {Balance:N2} {CCY}"</span>;
+    }
+}</code></pre>
+    </div>
+    <div>
+      <h3>Derived &mdash; Custom Behavior</h3>
+      <pre style="font-size:0.85em"><code><span class="kw">public class</span> <span class="tp">DepositAccount</span>
+    : <span class="tp">FinancialProduct</span>
+{
+    <span class="cm">// override = I'm REPLACING it</span>
+    <span class="kw">public override</span> <span class="tp">string</span> GetStatement()
+    {
+        <span class="kw">return</span> <span class="nm">$</span><span class="str">"Deposit: {Balance:N2}"</span>
+             + <span class="nm">$</span><span class="str">" @ {InterestRate:P2}"</span>;
+    }
+}</code></pre>
+    </div>
+  </div>
+  <pre style="margin-top:12px"><code><span class="tp">FinancialProduct</span> p = <span class="kw">new</span> <span class="tp">DepositAccount</span>(<span class="num">1</span>, <span class="num">42</span>, <span class="str">"GEL"</span>, <span class="num">0.12m</span>, maturity);
+Console.WriteLine(p.GetStatement());  <span class="cm">// "Deposit: 0.00 @ 12.00%" &mdash; DepositAccount version runs!</span></code></pre>
+</div>
+
+<!-- SLIDE 7: abstract -->
+<div class="slide" data-slide="7">
+  <h2><code>abstract</code> &mdash; "You MUST Implement This"</h2>
+  <p>An <code>abstract</code> method has <strong>no body</strong> &mdash; derived classes must provide one:</p>
+  <pre style="font-size:0.88em"><code><span class="kw">public abstract class</span> <span class="tp">Transaction</span>
+{
+    <span class="kw">public</span> <span class="tp">long</span> Id { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="tp">decimal</span> Amount { <span class="kw">get</span>; }
+
+    <span class="kw">protected</span> Transaction(<span class="tp">long</span> id, <span class="tp">decimal</span> amount) { Id = id; Amount = amount; }
+
+    <span class="kw">public abstract</span> <span class="tp">string</span> TransactionType { <span class="kw">get</span>; }  <span class="cm">// no body &mdash; MUST override</span>
+    <span class="kw">public abstract bool</span> Execute();                   <span class="cm">// no body &mdash; MUST override</span>
+}
+
+<span class="cm">// var t = new Transaction(1, 100m);  // COMPILER ERROR &mdash; abstract!</span>
+
+<span class="kw">public class</span> <span class="tp">DepositTransaction</span> : <span class="tp">Transaction</span>
+{
+    <span class="kw">public override</span> <span class="tp">string</span> TransactionType => <span class="str">"DEPOSIT"</span>;  <span class="cm">// required</span>
+    <span class="kw">public override bool</span> Execute() { <span class="cm">/* deposit logic */</span> <span class="kw">return true</span>; }
+    <span class="kw">public</span> DepositTransaction(<span class="tp">long</span> id, <span class="tp">decimal</span> amount) : <span class="kw">base</span>(id, amount) { }
+}</code></pre>
+  <div class="analogy">An abstract class is like a table type definition that can never hold data itself &mdash; only defines the structure for others to follow.</div>
+</div>
+
+<!-- SLIDE 8: Hierarchy visual -->
+<div class="slide" data-slide="8">
+  <h2>Inheritance Hierarchy</h2>
+  <div class="hierarchy">
+    <div class="h-node abstract" style="border-color:var(--accent2)">
+      <span style="color:var(--accent2); font-size:0.8em">abstract</span><br>
+      Transaction
+    </div>
+    <div class="h-connector"></div>
+    <div class="h-branch">
+      <div class="h-branch-arm">
+        <div class="h-connector"></div>
+        <div class="h-node">DepositTransaction</div>
+      </div>
+      <div class="h-branch-arm">
+        <div class="h-connector"></div>
+        <div class="h-node">WithdrawalTransaction</div>
+      </div>
+      <div class="h-branch-arm">
+        <div class="h-connector"></div>
+        <div class="h-node">TransferTransaction</div>
+      </div>
+      <div class="h-branch-arm">
+        <div class="h-connector"></div>
+        <div class="h-node">FeeChargeTransaction</div>
+      </div>
+    </div>
+  </div>
+  <div class="highlight-box" style="margin-top:20px">
+    <p>All four types share <code>Id</code>, <code>Amount</code>, <code>CCY</code>, <code>Status</code>, <code>CreateTime</code> from <code>Transaction</code>. Each provides its own <code>Execute()</code> and <code>TransactionType</code>.</p>
+  </div>
+</div>
+
+<!-- SLIDE 9: Quiz 1 -->
+<div class="slide" data-slide="9">
+  <h2>Quick Check</h2>
+  <p style="font-size:1.2em; margin-bottom:24px">Which keyword means "derived classes <strong>must</strong> provide their own implementation"?</p>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'q1')">A. <code>virtual</code></div>
+  <div class="quiz-option" onclick="checkQuiz(this, true, 'q1')">B. <code>abstract</code></div>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'q1')">C. <code>override</code></div>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'q1')">D. <code>sealed</code></div>
+  <div class="quiz-feedback correct" id="q1-correct">
+    &#10003; Correct! <code>abstract</code> means "no default implementation &mdash; every derived class must provide one." <code>virtual</code> means "here's a default, but you CAN override it."
+  </div>
+  <div class="quiz-feedback wrong" id="q1-wrong">
+    &#10007; Not quite. <code>abstract</code> = must implement. <code>virtual</code> = can override (optional). <code>override</code> = the act of replacing. <code>sealed</code> = prevent further inheritance.
+  </div>
+</div>
+
+<!-- SLIDE 10: Interfaces intro -->
+<div class="slide" data-slide="10">
+  <h2>Interfaces &mdash; Contracts for Behavior</h2>
+  <p>An interface defines <strong>what</strong> a class must do, not <strong>how</strong>:</p>
+  <pre><code><span class="kw">public interface</span> <span class="tp">IFeeCalculator</span>
+{
+    <span class="tp">decimal</span> Calculate(<span class="tp">decimal</span> transactionAmount);
+    <span class="tp">string</span> FeeType { <span class="kw">get</span>; }
+}</code></pre>
+  <p style="margin-top:16px">Any class that "implements" this interface <strong>promises</strong> to have <code>Calculate</code> and <code>FeeType</code>:</p>
+  <pre><code><span class="kw">public class</span> <span class="tp">FixedFeeCalculator</span> : <span class="tp">IFeeCalculator</span>
+{
+    <span class="kw">public</span> <span class="tp">string</span> FeeType => <span class="str">"Fixed"</span>;
+    <span class="kw">public</span> <span class="tp">decimal</span> Calculate(<span class="tp">decimal</span> amount) => <span class="num">5m</span>;  <span class="cm">// always 5</span>
+}
+
+<span class="kw">public class</span> <span class="tp">PercentFeeCalculator</span> : <span class="tp">IFeeCalculator</span>
+{
+    <span class="kw">public</span> <span class="tp">string</span> FeeType => <span class="str">"Percent"</span>;
+    <span class="kw">public</span> <span class="tp">decimal</span> Calculate(<span class="tp">decimal</span> amount) => amount * <span class="num">0.02m</span>;  <span class="cm">// 2%</span>
+}</code></pre>
+  <div class="analogy">An interface is like a rule: "every fee procedure must accept <code>@Amount DECIMAL</code> and return <code>DECIMAL</code>." Multiple procedures can follow the same rule differently.</div>
+</div>
+
+<!-- SLIDE 11: HSP IF/ELSE problem -->
+<div class="slide" data-slide="11">
+  <h2>The HSP Problem &mdash; IF/ELSE Chains</h2>
+  <div class="columns">
+    <div>
+      <h3>SQL &mdash; Growing IF/ELSE</h3>
+      <pre style="font-size:0.82em"><code><span class="cm">-- Every new fee type = another ELSE IF</span>
+<span class="kw">IF</span> <span class="nm">@FeeType</span> = <span class="num">1</span>
+    <span class="kw">RETURN</span> <span class="nm">@FixedFee</span>
+<span class="kw">ELSE IF</span> <span class="nm">@FeeType</span> = <span class="num">2</span>
+    <span class="kw">RETURN</span> <span class="nm">@Amount</span> * <span class="nm">@Percent</span> / <span class="num">100</span>
+<span class="kw">ELSE IF</span> <span class="nm">@FeeType</span> = <span class="num">3</span>
+    <span class="cm">-- tiered logic...</span>
+<span class="kw">ELSE IF</span> <span class="nm">@FeeType</span> = <span class="num">4</span>
+    <span class="cm">-- new type...</span>
+<span class="kw">ELSE IF</span> <span class="nm">@FeeType</span> = <span class="num">5</span>
+    <span class="cm">-- another new type...</span></code></pre>
+    </div>
+    <div>
+      <h3>C# &mdash; Interface</h3>
+      <pre style="font-size:0.82em"><code><span class="cm">// No IF/ELSE &mdash; just use the interface</span>
+<span class="tp">IFeeCalculator</span> calc = GetCalculator(feeConfigId);
+<span class="tp">decimal</span> fee = calc.Calculate(amount);
+
+<span class="cm">// Adding a new fee type?</span>
+<span class="cm">// Just create a new class.</span>
+<span class="cm">// No existing code changes!</span>
+<span class="kw">public class</span> <span class="tp">VolumeFeeCalculator</span>
+    : <span class="tp">IFeeCalculator</span>
+{
+    <span class="kw">public</span> <span class="tp">decimal</span> Calculate(<span class="tp">decimal</span> amount)
+        => <span class="cm">/* new logic */</span>;
+}</code></pre>
+    </div>
+  </div>
+  <div class="highlight-box green">
+    <p><strong>Open/Closed Principle:</strong> Open for extension (new classes), closed for modification (existing code doesn't change).</p>
+  </div>
+</div>
+
+<!-- SLIDE 12: Multiple interfaces -->
+<div class="slide" data-slide="12">
+  <h2>Multiple Interfaces &mdash; Multiple Contracts</h2>
+  <p>A class can implement <strong>many</strong> interfaces (unlike inheritance &mdash; only one base class):</p>
+  <pre><code><span class="kw">public interface</span> <span class="tp">ILoggable</span>     { <span class="tp">string</span> ToLogString(); }
+<span class="kw">public interface</span> <span class="tp">IAuditable</span>    { <span class="tp">DateTime</span> LastModified { <span class="kw">get</span>; } }
+<span class="kw">public interface</span> <span class="tp">IReversible</span>   { <span class="tp">bool</span> Reverse(); }
+
+<span class="cm">// One class, three contracts</span>
+<span class="kw">public class</span> <span class="tp">WireTransfer</span> : <span class="tp">Transaction</span>, <span class="tp">ILoggable</span>, <span class="tp">IAuditable</span>, <span class="tp">IReversible</span>
+{
+    <span class="kw">public</span> <span class="tp">string</span> ToLogString() => <span class="nm">$</span><span class="str">"Wire #{Id}: {Amount:N2}"</span>;
+    <span class="kw">public</span> <span class="tp">DateTime</span> LastModified { <span class="kw">get</span>; }
+    <span class="kw">public bool</span> Reverse() { <span class="cm">/* reversal logic */</span> <span class="kw">return true</span>; }
+    <span class="cm">// ...plus Transaction members</span>
+}</code></pre>
+  <div class="highlight-box">
+    <p><strong>Inheritance:</strong> one base class (IS A). <strong>Interfaces:</strong> many contracts (CAN DO).</p>
+  </div>
+</div>
+
+<!-- SLIDE 13: abstract class vs interface -->
+<div class="slide" data-slide="13">
+  <h2>Abstract Class vs Interface</h2>
+  <table>
+    <tr><th>Feature</th><th>Interface</th><th>Abstract Class</th></tr>
+    <tr><td>How many?</td><td>Implement <strong>many</strong></td><td>Extend <strong>one</strong></td></tr>
+    <tr><td>Fields/state</td><td>No instance fields</td><td>Can have fields</td></tr>
+    <tr><td>Constructors</td><td>No</td><td>Yes</td></tr>
+    <tr><td>Default methods</td><td>Since C# 8 (limited)</td><td>Full implementations</td></tr>
+    <tr><td>Relationship</td><td><strong>"Can do"</strong> (capability)</td><td><strong>"Is a"</strong> (category)</td></tr>
+  </table>
+  <div class="columns" style="margin-top:16px">
+    <div class="highlight-box green">
+      <h3>"Is a" &rarr; Abstract Class</h3>
+      <p>DepositTransaction <strong>is a</strong> Transaction</p>
+      <p>LoanAccount <strong>is a</strong> FinancialProduct</p>
+    </div>
+    <div class="highlight-box">
+      <h3>"Can do" &rarr; Interface</h3>
+      <p>Transaction <strong>can be</strong> validated (IValidator)</p>
+      <p>Account <strong>can be</strong> logged (ILoggable)</p>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 14: Polymorphism -->
+<div class="slide" data-slide="14">
+  <h2>Polymorphism &mdash; One Call, Many Behaviors</h2>
+  <p><strong>Polymorphism</strong> = treating different objects through a common type. Each responds with its own behavior:</p>
+  <div class="columns">
+    <div>
+      <h3>HSP Way (IF/ELSE)</h3>
+      <pre style="font-size:0.82em"><code><span class="kw">IF</span> <span class="nm">@Type</span> = <span class="str">'DEPOSIT'</span>
+    <span class="kw">EXEC</span> <span class="nm">hp.spDeposit</span> <span class="nm">@ID</span>
+<span class="kw">ELSE IF</span> <span class="nm">@Type</span> = <span class="str">'WITHDRAWAL'</span>
+    <span class="kw">EXEC</span> <span class="nm">hp.spWithdraw</span> <span class="nm">@ID</span>
+<span class="kw">ELSE IF</span> <span class="nm">@Type</span> = <span class="str">'TRANSFER'</span>
+    <span class="kw">EXEC</span> <span class="nm">hp.spTransfer</span> <span class="nm">@ID</span>
+<span class="kw">ELSE IF</span> <span class="nm">@Type</span> = <span class="str">'FEE'</span>
+    <span class="kw">EXEC</span> <span class="nm">hp.spChargeFee</span> <span class="nm">@ID</span></code></pre>
+    </div>
+    <div>
+      <h3>C# Way (Polymorphism)</h3>
+      <pre style="font-size:0.82em"><code><span class="cm">// No IF/ELSE needed!</span>
+<span class="tp">Transaction</span> tx = GetTransaction(id);
+tx.Execute();
+<span class="cm">// The correct version runs automatically</span>
+<span class="cm">// based on the actual type of the object</span>
+
+<span class="cm">// Process a whole batch:</span>
+<span class="kw">foreach</span> (<span class="kw">var</span> tx <span class="kw">in</span> batch)
+    tx.Execute();
+<span class="cm">// Each executes its own way</span></code></pre>
+    </div>
+  </div>
+  <div class="highlight-box green">
+    <p><strong>That's polymorphism:</strong> one <code>Execute()</code> call, but deposits deposit, withdrawals withdraw, and transfers transfer. The object knows what to do.</p>
+  </div>
+</div>
+
+<!-- SLIDE 15: Polymorphism demo -->
+<div class="slide" data-slide="15">
+  <h2>Polymorphism Demo</h2>
+  <pre><code><span class="tp">List</span>&lt;<span class="tp">Transaction</span>&gt; batch = <span class="kw">new</span>()
+{
+    <span class="kw">new</span> <span class="tp">DepositTransaction</span>(<span class="num">1</span>, <span class="num">1000m</span>, <span class="str">"GEL"</span>, account),
+    <span class="kw">new</span> <span class="tp">WithdrawalTransaction</span>(<span class="num">2</span>, <span class="num">200m</span>, <span class="str">"GEL"</span>, account),
+    <span class="kw">new</span> <span class="tp">TransferTransaction</span>(<span class="num">3</span>, <span class="num">300m</span>, <span class="str">"GEL"</span>, account, otherAccount)
+};
+
+<span class="kw">foreach</span> (<span class="tp">Transaction</span> tx <span class="kw">in</span> batch)
+{
+    <span class="tp">bool</span> ok = tx.Execute();
+    Console.WriteLine(<span class="nm">$</span><span class="str">"{tx.TransactionType} #{tx.Id}: {(ok ? "OK" : "FAIL")}"</span>);
+}</code></pre>
+  <div class="code-runner">
+    <div class="code-runner-header">
+      <span>Expected output</span>
+      <button class="run-btn" onclick="simulateRun(this,'demo1')">&#9654; Run</button>
+    </div>
+    <div class="code-output" id="demo1">
+ DEPOSIT #1: OK
+ WITHDRAWAL #2: OK
+ TRANSFER #3: OK
+ account.Balance  = 500.00 GEL</div>
+  </div>
+</div>
+
+<!-- SLIDE 16: Interface polymorphism -->
+<div class="slide" data-slide="16">
+  <h2>Polymorphism Through Interfaces</h2>
+  <pre><code><span class="tp">List</span>&lt;<span class="tp">IFeeCalculator</span>&gt; calculators = <span class="kw">new</span>()
+{
+    <span class="kw">new</span> <span class="tp">FixedFeeCalculator</span>(<span class="num">5m</span>),
+    <span class="kw">new</span> <span class="tp">PercentFeeCalculator</span>(<span class="num">2m</span>, <span class="num">1m</span>, <span class="num">100m</span>),
+    <span class="kw">new</span> <span class="tp">TieredFeeCalculator</span>()
+};
+
+<span class="tp">decimal</span> amount = <span class="num">5000m</span>;
+<span class="kw">foreach</span> (<span class="tp">IFeeCalculator</span> calc <span class="kw">in</span> calculators)
+{
+    Console.WriteLine(<span class="nm">$</span><span class="str">"{calc.FeeType}: {calc.Calculate(amount):N2}"</span>);
+}</code></pre>
+  <div class="code-runner">
+    <div class="code-runner-header">
+      <span>Expected output</span>
+      <button class="run-btn" onclick="simulateRun(this,'demo2')">&#9654; Run</button>
+    </div>
+    <div class="code-output" id="demo2">
+ Fixed: 5.00
+ Percent: 100.00
+ Tiered: 30.00</div>
+  </div>
+  <div class="analogy">Same <code>Calculate()</code> call, three different results. The interface is the contract; polymorphism is the magic.</div>
+</div>
+
+<!-- SLIDE 17: Quiz 2 -->
+<div class="slide" data-slide="17">
+  <h2>Quick Check</h2>
+  <p style="font-size:1.1em; margin-bottom:16px">What is the main advantage of polymorphism over IF/ELSE chains?</p>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'q2')">A. It runs faster</div>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'q2')">B. It uses less memory</div>
+  <div class="quiz-option" onclick="checkQuiz(this, true, 'q2')">C. Adding new types doesn't require changing existing code</div>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'q2')">D. It looks more professional</div>
+  <div class="quiz-feedback correct" id="q2-correct">
+    &#10003; Correct! With IF/ELSE, every new type means modifying existing code. With polymorphism, you just add a new class &mdash; existing code keeps working untouched.
+  </div>
+  <div class="quiz-feedback wrong" id="q2-wrong">
+    &#10007; The key benefit is <strong>extensibility without modification</strong>. New types = new classes, not new IF branches. This is the Open/Closed Principle in action.
+  </div>
+</div>
+
+<!-- SLIDE 18: Four Pillars -->
+<div class="slide" data-slide="18">
+  <h2>The Four OOP Pillars</h2>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:16px">
+    <div class="pillar-box active">
+      <h3 style="color:var(--green)">1. Encapsulation</h3>
+      <p>Hide internals, expose controlled interface</p>
+      <code style="font-size:0.85em">{ get; private set; }</code>
+      <p style="color:var(--text-dim); font-size:0.9em; margin-top:8px">Session 4</p>
+    </div>
+    <div class="pillar-box active">
+      <h3 style="color:var(--green)">2. Abstraction</h3>
+      <p>Simple interface hides complex implementation</p>
+      <code style="font-size:0.85em">interface IFeeCalculator</code>
+      <p style="color:var(--text-dim); font-size:0.9em; margin-top:8px">Session 5</p>
+    </div>
+    <div class="pillar-box active">
+      <h3 style="color:var(--green)">3. Inheritance</h3>
+      <p>Extend and reuse existing classes</p>
+      <code style="font-size:0.85em">class Deposit : Transaction</code>
+      <p style="color:var(--text-dim); font-size:0.9em; margin-top:8px">Session 5</p>
+    </div>
+    <div class="pillar-box active">
+      <h3 style="color:var(--green)">4. Polymorphism</h3>
+      <p>Same call, different behavior per type</p>
+      <code style="font-size:0.85em">tx.Execute() // each type differs</code>
+      <p style="color:var(--text-dim); font-size:0.9em; margin-top:8px">Session 5</p>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 19: Pillars SQL analogy -->
+<div class="slide" data-slide="19">
+  <h2>OOP Pillars &mdash; SQL Analogies</h2>
+  <table>
+    <tr><th>Pillar</th><th>C# Example</th><th>SQL Analogy</th></tr>
+    <tr>
+      <td><strong>Encapsulation</strong></td>
+      <td><code>Balance { get; private set; }</code></td>
+      <td>Stored procedure hiding complex SQL behind a simple EXEC</td>
+    </tr>
+    <tr>
+      <td><strong>Abstraction</strong></td>
+      <td><code>IPaymentProcessor.Process()</code></td>
+      <td>Calling <code>EXEC hp.spProcess</code> without knowing the 15 sub-procedures inside</td>
+    </tr>
+    <tr>
+      <td><strong>Inheritance</strong></td>
+      <td><code>Deposit : Transaction</code></td>
+      <td>Views extending base tables with extra columns/logic</td>
+    </tr>
+    <tr>
+      <td><strong>Polymorphism</strong></td>
+      <td><code>tx.Execute()</code> varies by type</td>
+      <td>Dynamic procedure dispatch &mdash; but type-safe</td>
+    </tr>
+  </table>
+</div>
+
+<!-- SLIDE 20: Strategy Pattern -->
+<div class="slide" data-slide="20">
+  <h2>Strategy Pattern &mdash; Swappable Behavior</h2>
+  <p>The combination of interfaces + polymorphism creates the <strong>Strategy Pattern</strong>:</p>
+  <pre style="font-size:0.85em"><code><span class="kw">public class</span> <span class="tp">TransactionProcessor</span>
+{
+    <span class="kw">private readonly</span> <span class="tp">ITransactionValidator</span> _validator;
+    <span class="kw">private readonly</span> <span class="tp">IFeeCalculator</span> _feeCalc;
+
+    <span class="kw">public</span> TransactionProcessor(<span class="tp">ITransactionValidator</span> v, <span class="tp">IFeeCalculator</span> f)
+    { _validator = v; _feeCalc = f; }
+
+    <span class="kw">public bool</span> Process(<span class="tp">Transaction</span> tx, <span class="tp">BankAccount</span> acct)
+    {
+        <span class="kw">if</span> (!_validator.Validate(tx, acct)) <span class="kw">return false</span>;
+        <span class="tp">decimal</span> fee = _feeCalc.Calculate(tx.Amount);
+        <span class="kw">return</span> tx.Execute();
+    }
+}
+
+<span class="cm">// Retail: percent fee, basic validation</span>
+<span class="kw">var</span> retail = <span class="kw">new</span> <span class="tp">TransactionProcessor</span>(<span class="kw">new</span> <span class="tp">BasicValidator</span>(), <span class="kw">new</span> <span class="tp">PercentFeeCalculator</span>(...));
+
+<span class="cm">// VIP: no fee, strict validation</span>
+<span class="kw">var</span> vip = <span class="kw">new</span> <span class="tp">TransactionProcessor</span>(<span class="kw">new</span> <span class="tp">StrictValidator</span>(), <span class="kw">new</span> <span class="tp">FixedFeeCalculator</span>(<span class="num">0m</span>));</code></pre>
+  <div class="highlight-box green">
+    <p><strong>Same class, completely different behavior</strong> &mdash; just by injecting different implementations. This is how ASP.NET Core services work.</p>
+  </div>
+</div>
+
+<!-- SLIDE 21: is / as -->
+<div class="slide" data-slide="21">
+  <h2><code>is</code> and <code>as</code> &mdash; Type Checking</h2>
+  <p>Sometimes you need to know the actual type of a polymorphic object:</p>
+  <pre><code><span class="tp">Transaction</span> tx = GetTransaction(id);
+
+<span class="cm">// Pattern matching with 'is'</span>
+<span class="kw">if</span> (tx <span class="kw">is</span> <span class="tp">TransferTransaction</span> transfer)
+{
+    Console.WriteLine(<span class="nm">$</span><span class="str">"From: {transfer.SourceAccount.AccountNumber}"</span>);
+    Console.WriteLine(<span class="nm">$</span><span class="str">"To:   {transfer.DestinationAccount.AccountNumber}"</span>);
+}
+<span class="kw">else if</span> (tx <span class="kw">is</span> <span class="tp">DepositTransaction</span> deposit)
+{
+    Console.WriteLine(<span class="nm">$</span><span class="str">"Into: {deposit.TargetAccount.AccountNumber}"</span>);
+}</code></pre>
+  <div class="analogy">Like checking a <code>TransactionType</code> column: <code>IF @Type = 'TRANSFER' SELECT SourceAccount, DestAccount ...</code> &mdash; but type-safe.</div>
+</div>
+
+<!-- SLIDE 22: sealed -->
+<div class="slide" data-slide="22">
+  <h2><code>sealed</code> &mdash; Locking Down</h2>
+  <p><code>sealed</code> prevents a class from being inherited further:</p>
+  <pre><code><span class="kw">public sealed class</span> <span class="tp">FeeChargeTransaction</span> : <span class="tp">Transaction</span>
+{
+    <span class="kw">public override</span> <span class="tp">string</span> TransactionType => <span class="str">"FEE"</span>;
+    <span class="kw">public override bool</span> Execute() { <span class="cm">/* fee logic */</span> <span class="kw">return true</span>; }
+}
+
+<span class="cm">// This would NOT compile:</span>
+<span class="cm">// public class SpecialFee : FeeChargeTransaction { }  // ERROR!</span></code></pre>
+  <table style="margin-top:20px">
+    <tr><th>Keyword</th><th>Meaning</th></tr>
+    <tr><td><code>virtual</code></td><td>CAN be overridden (optional)</td></tr>
+    <tr><td><code>abstract</code></td><td>MUST be overridden (required)</td></tr>
+    <tr><td><code>override</code></td><td>I AM overriding a parent method</td></tr>
+    <tr><td><code>sealed</code></td><td>CANNOT be inherited further</td></tr>
+  </table>
+</div>
+
+<!-- SLIDE 23: Quiz 3 -->
+<div class="slide" data-slide="23">
+  <h2>Quick Check</h2>
+  <p style="font-size:1.1em; margin-bottom:16px">A class needs to follow multiple contracts: it must be loggable, auditable, AND reversible. What should you use?</p>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'q3')">A. Inherit from three base classes</div>
+  <div class="quiz-option" onclick="checkQuiz(this, true, 'q3')">B. Implement three interfaces</div>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'q3')">C. Create one base class with all three behaviors</div>
+  <div class="quiz-option" onclick="checkQuiz(this, false, 'q3')">D. Use static methods for each capability</div>
+  <div class="quiz-feedback correct" id="q3-correct">
+    &#10003; Correct! C# supports single inheritance (one base class) but <strong>multiple interface implementation</strong>. Use interfaces for capabilities: <code>class WireTransfer : Transaction, ILoggable, IAuditable, IReversible</code>.
+  </div>
+  <div class="quiz-feedback wrong" id="q3-wrong">
+    &#10007; C# only allows <strong>one</strong> base class (single inheritance), but a class can implement <strong>many</strong> interfaces. Use interfaces for "can do" capabilities.
+  </div>
+</div>
+
+<!-- SLIDE 24: Exercise intro -->
+<div class="slide" data-slide="24">
+  <h2>Today's Exercise</h2>
+  <p class="subtitle">Build a transaction processing system</p>
+  <div style="margin-top:16px">
+    <div class="highlight-box orange">
+      <h3>The Hierarchy</h3>
+      <p>Abstract <code>Transaction</code> &rarr; <code>DepositTransaction</code>, <code>WithdrawalTransaction</code>, <code>TransferTransaction</code></p>
+    </div>
+    <div style="margin-top:12px">
+      <h3>Your Exercises (6 + bonus)</h3>
+      <ul>
+        <li>Exercise 1: <code>Transaction</code> abstract base class</li>
+        <li>Exercise 2: Three derived transaction types (Deposit, Withdrawal, Transfer)</li>
+        <li>Exercise 3: <code>ITransactionValidator</code> &mdash; Basic and Strict implementations</li>
+        <li>Exercise 4: <code>IFeeCalculator</code> &mdash; Fixed, Percent, and Tiered</li>
+        <li>Exercise 5: <code>TransactionProcessor</code> &mdash; compose everything</li>
+        <li>Challenge: <code>FeeChargeTransaction</code> + Notification system</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 25: Summary -->
+<div class="slide" data-slide="25">
+  <h2>Session 5 &mdash; Complete Reference</h2>
+  <table style="font-size:0.95em">
+    <tr><th>SQL Concept</th><th>C# Equivalent</th><th>Session</th></tr>
+    <tr><td>Repeated columns across tables</td><td>Shared base class</td><td>5</td></tr>
+    <tr><td>View extending a table</td><td><code>class Derived : Base</code></td><td>5</td></tr>
+    <tr><td>Template procedure (no body)</td><td><code>abstract</code> method</td><td>5</td></tr>
+    <tr><td>Override per type</td><td><code>virtual</code> / <code>override</code></td><td>5</td></tr>
+    <tr><td>API contract for procedures</td><td><code>interface</code></td><td>5</td></tr>
+    <tr><td>IF/ELSE by type column</td><td>Polymorphism (no IF/ELSE)</td><td>5</td></tr>
+    <tr><td>Multiple standards to follow</td><td>Multiple interfaces</td><td>5</td></tr>
+    <tr><td>Prevent further extension</td><td><code>sealed</code></td><td>5</td></tr>
+    <tr><td>Check type/category column</td><td><code>is</code> pattern matching</td><td>5</td></tr>
+  </table>
+</div>
+
+<!-- SLIDE 26: What's next -->
+<div class="slide" data-slide="26">
+  <h2>What's Next &mdash; Session 6</h2>
+  <div class="columns">
+    <div>
+      <h3>Session 6: Structs, Enums, Records &amp; Tuples</h3>
+      <ul>
+        <li><code>struct</code> &mdash; lightweight value types</li>
+        <li><code>enum</code> &mdash; like a lookup table</li>
+        <li><code>record</code> &mdash; immutable DTOs</li>
+        <li>Tuples &mdash; quick multi-value returns</li>
+        <li>Nullable types in depth</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Homework</h3>
+      <div class="highlight-box">
+        <ul>
+          <li>Complete all exercises in <code>04-hands-on-exercises.md</code></li>
+          <li>Ensure all tests pass with <code>dotnet test</code></li>
+          <li>Try the bonus Notification exercise</li>
+          <li>Read: <em>C# 12 in a Nutshell</em> &mdash; Ch. 3 (Inheritance, Interfaces)</li>
+          <li>Browse: Refactoring.Guru &mdash; "What is Polymorphism?"</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="big-center" style="margin-top:24px">
+    <span class="tag tag-green">Control Flow &#10003;</span>
+    <span class="tag tag-green">Methods &#10003;</span>
+    <span class="tag tag-green">Classes &amp; Objects &#10003;</span>
+    <span class="tag tag-green">Inheritance &amp; Polymorphism &#10003;</span>
+    <span class="tag tag-blue">Structs, Enums, Records &rarr; Next</span>
+  </div>
+</div>
+
+</div><!-- /slide-container -->
+
+<div class="nav">
+  <button id="prevBtn" onclick="navigate(-1)" disabled>&#8592;</button>
+  <span class="slide-counter" id="slideCounter">1 / 26</span>
+  <button id="nextBtn" onclick="navigate(1)">&#8594;</button>
+</div>
+<div class="keyboard-hints"><kbd>&#8592;</kbd> <kbd>&#8594;</kbd> Navigate &nbsp;&bull;&nbsp; <kbd>Space</kbd> Next &nbsp;&bull;&nbsp; <kbd>R</kbd> Reveal items</div>
+
+<script>
+  let currentSlide = 1;
+  const totalSlides = document.querySelectorAll('.slide').length;
+  function showSlide(n) {
+    document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+    const t = document.querySelector(`[data-slide="${n}"]`);
+    if (t) { t.classList.add('active'); currentSlide = n; updateUI(); revealItems(); }
+  }
+  function navigate(d) { const n = currentSlide + d; if (n >= 1 && n <= totalSlides) showSlide(n); }
+  function updateUI() {
+    document.getElementById('slideCounter').textContent = `${currentSlide} / ${totalSlides}`;
+    document.getElementById('prevBtn').disabled = currentSlide === 1;
+    document.getElementById('nextBtn').disabled = currentSlide === totalSlides;
+    document.getElementById('progressBar').style.width = `${(currentSlide / totalSlides) * 100}%`;
+  }
+  function revealItems() {
+    const items = document.querySelector('.slide.active').querySelectorAll('.reveal-item:not(.visible)');
+    items.forEach((item, i) => setTimeout(() => item.classList.add('visible'), 200 * (i + 1)));
+  }
+  function simulateRun(btn, id) {
+    btn.textContent = '\u23F3 Running...'; btn.disabled = true;
+    setTimeout(() => {
+      document.getElementById(id).classList.add('show');
+      btn.textContent = '\u2713 Done';
+      setTimeout(() => { btn.textContent = '\u25B6 Run'; btn.disabled = false; }, 2000);
+    }, 800);
+  }
+  function checkQuiz(el, correct, qid) {
+    const s = el.closest('.slide');
+    s.querySelectorAll('.quiz-option').forEach(o => { o.classList.remove('correct','wrong'); o.style.pointerEvents = 'none'; });
+    s.querySelectorAll('.quiz-feedback').forEach(f => f.classList.remove('show'));
+    el.classList.add(correct ? 'correct' : 'wrong');
+    document.getElementById(qid + (correct ? '-correct' : '-wrong')).classList.add('show');
+    setTimeout(() => s.querySelectorAll('.quiz-option').forEach(o => o.style.pointerEvents = 'auto'), 3000);
+  }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); navigate(1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); navigate(-1); }
+    if (e.key === 'r' || e.key === 'R') revealItems();
+    if (e.key === 'Home') showSlide(1);
+    if (e.key === 'End') showSlide(totalSlides);
+  });
+  let touchX = 0;
+  document.addEventListener('touchstart', e => touchX = e.touches[0].clientX);
+  document.addEventListener('touchend', e => { const d = touchX - e.changedTouches[0].clientX; if (Math.abs(d) > 50) navigate(d > 0 ? 1 : -1); });
+  updateUI(); revealItems();
+</script>
+</body>
+</html>
